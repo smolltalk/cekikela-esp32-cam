@@ -2,16 +2,32 @@
 
 statusCode initSDCard() {
   //Serial.println("Starting SD Card");
-  if (!SD_MMC.begin("/sd", true)) {
-    Serial.println("SD Card Mount Failed");
+  // Fix SD card initialization
+  if (!SD_MMC.begin("/sdcard", true)) {
+    Serial.println("SD Card Mount Failed.");
+    return sdInitError;
+  }
+  uint8_t cardType = SD_MMC.cardType();
+
+  if (cardType == CARD_NONE) {
+    Serial.println("No SD card attached.");
     return sdInitError;
   }
 
-  uint8_t cardType = SD_MMC.cardType();
-  if (cardType == CARD_NONE) {
-    Serial.println("No SD Card attached");
-    return sdInitError;
+  Serial.print("SD Card Type: ");
+  if (cardType == CARD_MMC) {
+    Serial.print("MMC");
+  } else if (cardType == CARD_SD) {
+    Serial.print("SDSC");
+  } else if (cardType == CARD_SDHC) {
+    Serial.print("SDHC");
+  } else {
+    Serial.print("UNKNOWN");
   }
+  Serial.println(".");
+
+  uint64_t cardSize = SD_MMC.cardSize() / (1024 * 1024);
+  Serial.printf("SD Card Size: %lluMB.\n", cardSize);
 
   Serial.println("SD Card mounted.");
   return ok;
@@ -22,48 +38,59 @@ void endSDCard() {
   SD_MMC.end();
 }
 
-statusCode readFilesMetaData(FilesMetaData * filesMetaData){
+statusCode readFilesMetaData(FilesMetaData *filesMetaData) {
+  Serial.println("readFilesMetaData...");
   fs::FS &fs = SD_MMC;
+  Serial.printf("File %s %s.\n", FILES_META_DATA_FILE_NAME, fs.exists(FILES_META_DATA_FILE_NAME) ? "exists" : "does not exist");
   File file = fs.open(FILES_META_DATA_FILE_NAME, FILE_READ);
   if (file) {
-    size_t len = sizeof(FilesMetaData);
-    return (file.read((uint8_t *) filesMetaData, len) == len)?ok:sdReadError;
+    char buffer[16];
+    Serial.printf("File %s open in reading mode.\n", FILES_META_DATA_FILE_NAME);
+    file.readBytes(buffer, file.available());
+    int readParamCount = sscanf(buffer, "%d,%d", &filesMetaData->pictureNumber, &filesMetaData->uploadedPictureNumber);
+    file.close();
+    if (readParamCount == 2) {
+      return ok;
+    }
+    // Else
+    Serial.printf("Read error: %d parameter read. Expected 2.\n", readParamCount);
+    return sdReadError;
   }
   // Else
+  Serial.printf("Failed to open file %s in reading mode.\n", FILES_META_DATA_FILE_NAME);
   return sdReadError;
 }
 
-statusCode writeFilesMetaData(FilesMetaData * filesMetaData){
+statusCode writeFilesMetaData(FilesMetaData *filesMetaData) {
   Serial.println("writeFilesMetaData...");
   fs::FS &fs = SD_MMC;
   File file = fs.open(FILES_META_DATA_FILE_NAME, FILE_WRITE);
   if (file) {
+    char buffer[16];
     Serial.printf("File %s open in writing mode.\n", FILES_META_DATA_FILE_NAME);
-    size_t len = sizeof(FilesMetaData);
-    return (file.write((uint8_t *) filesMetaData, len) == len)?ok:sdWriteError;
+    statusCode result = (file.write((uint8_t*) buffer, sprintf(buffer, "%d,%d", filesMetaData->pictureNumber, filesMetaData->uploadedPictureNumber)) > 0) ? ok : sdWriteError;
+    file.close();
+    return result;
   }
-  Serial.printf("Failed to open file %s in writing mode.\n", FILES_META_DATA_FILE_NAME);
   // Else
+  Serial.printf("Failed to open file %s in writing mode.\n", FILES_META_DATA_FILE_NAME);
   return sdWriteError;
 }
 
-statusCode createFilesMetaData(FilesMetaData * filesMetaData){
+statusCode createFilesMetaData(FilesMetaData *filesMetaData) {
   Serial.println("createFilesMetaData...");
   filesMetaData->pictureNumber = 0;
   filesMetaData->uploadedPictureNumber = 0;
   return writeFilesMetaData(filesMetaData);
 }
 
-statusCode readOrCreateFilesMetaData(FilesMetaData * filesMetaData){
+statusCode readOrCreateFilesMetaData(FilesMetaData *filesMetaData) {
   Serial.println("readOrCreateFilesMetaData...");
-  return (readFilesMetaData(filesMetaData) == ok)?ok:createFilesMetaData(filesMetaData);
+  return (readFilesMetaData(filesMetaData) == ok) ? ok : createFilesMetaData(filesMetaData);
 }
 
-statusCode savePictureOnSDCard(char * pictureName, uint8_t * buf, size_t len) {
+statusCode savePictureOnSDCard(char *pictureName, uint8_t *buf, size_t len) {
   statusCode result = ok;
-  if ((result = initSDCard()) != ok){
-    return result;
-  }
 
   // Path where new picture will be saved in SD Card
   // Format file name like "picture-xxxxx.jpg"

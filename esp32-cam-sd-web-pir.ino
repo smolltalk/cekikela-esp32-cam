@@ -29,11 +29,11 @@
 void zzzzZZZZ() {
   // Switch off the red led to inform that the program is stopped
   switchOffRedLed();
-  // Wake up on up edge on pin 13
-  esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
-  // Go to sleep
-  Serial.println("Going to sleep now");
+  Serial.println("Going to sleep now.");
   Serial.flush();
+  // Wake up on up edge on pin 12
+  esp_sleep_enable_ext0_wakeup(GPIO_NUM_12, 1);
+  // Go to sleep
   esp_deep_sleep_start();
   Serial.println("This will never be printed");
 }
@@ -44,47 +44,48 @@ statusCode runActions() {
   camera_fb_t *fb = NULL;
   char pictureName[20];
   FilesMetaData filesMetaData;
-  connectionInfo_t connectionInfo = {.serverName = UPLOAD_SERVER_NAME, .serverPort = UPLOAD_SERVER_PORT, .uploadPath = UPLOAD_SERVER_PATH};
+  connectionInfo_t connectionInfo = { .serverName = UPLOAD_SERVER_NAME, .serverPort = UPLOAD_SERVER_PORT, .uploadPath = UPLOAD_SERVER_PATH };
 
   // Init camera
   if ((result = initCamera()) != ok) {
     return result;
   }
 
-  // Take picture and save it
+  // Take picture
   if ((result = takePicture(&fb)) != ok) {
     return result;
   }
 
   if (SAVE_PICTURE_ON_SD_CARD) {
+    // Writing on SD card involves flash lighting
+    disableLamp();
     if ((result = initSDCard()) == ok && (result = readOrCreateFilesMetaData(&filesMetaData)) == ok) {
       computePictureNameFromIndex(pictureName, filesMetaData.pictureNumber + 1);
       if ((result = savePictureOnSDCard(pictureName, fb->buf, fb->len)) == ok) {
-        filesMetaData.pictureNumber ++;
+        filesMetaData.pictureNumber++;
         writeFilesMetaData(&filesMetaData);
         pictureSavedOnSd = true;
       }
     }
   }
-
   if (UPLOAD_PICTURE) {
-      if (!pictureSavedOnSd){
-        statusCode uploadResult;
-        // Failed to saved on SD card, then try to upload.
-        computePictureNameFromRandom(pictureName);
-        uploadResult = uploadPicture(&connectionInfo, pictureName, fb->buf, fb->len);
-        // Don't override result when result already contains an error code.
-        if (result == ok){
-          result = uploadResult;
-        }
+    if (!pictureSavedOnSd) {
+      statusCode uploadResult;
+      // Failed to saved on SD card, then try to upload.
+      computePictureNameFromRandom(pictureName);
+      uploadResult = uploadPicture(&connectionInfo, pictureName, fb->buf, fb->len);
+      // Don't override result when result already contains an error code.
+      if (result == ok) {
+        result = uploadResult;
       }
-      else {
-        // Upload a bunch of files.
-        result = uploadPictureFiles(&connectionInfo, &filesMetaData);
-      }
-      endWifi();
+    } else {
+      // Upload a bunch of files.
+      result = uploadPictureFiles(&connectionInfo, &filesMetaData);
+    }
+    endWifi();
   }
   endSDCard();
+  endCamera(&fb);
 
   return result;
 }
@@ -93,16 +94,20 @@ void setup() {
   statusCode result;
   // Switch on the red led to inform that the program is running
   pinMode(RED_LED_PIN, OUTPUT);
+  // Indicate the board is awake
   switchOnRedLed();
   // Init serial
   Serial.begin(115200);
-  
+  // Writing on SD card involves flash lighting
+  disableLamp();
   // Run all actions
   result = runActions();
+  // Signal result
   signalError(result);
 
   // Wait to avoid photo galore
   delay(AWAKE_DURATION);
+  // Go to sleep
   zzzzZZZZ();
 }
 

@@ -15,7 +15,7 @@ typedef struct {
 statusCode initSDCard();
 void endSDCard();
 statusCode savePictureOnSDCard(char * pictureName, uint8_t * buf, size_t len);
-statusCode readFilesMetaData(FilesMetaData * filesMetaData);
+statusCode readFilesMetaData(FilesMetaData * filesMetaData);  
 statusCode writeFilesMetaData(FilesMetaData * filesMetaData);
 statusCode readOrCreateFilesMetaData(FilesMetaData * filesMetaData);
 

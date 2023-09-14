@@ -4,12 +4,9 @@ statusCode initCamera() {
   // Disable brownout detector
   // https://iotespresso.com/how-to-disable-brownout-detector-in-esp32-in-arduino/
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
-  
-  // Disable lamp/flash
-  disableLamp();
 
   camera_config_t config;
-  
+
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
   config.pin_d0 = Y2_GPIO_NUM;
@@ -40,7 +37,7 @@ statusCode initCamera() {
   // Init Camera
   esp_err_t err = esp_camera_init(&config);
   if (err != ESP_OK) {
-    Serial.printf("Camera init failed with error 0x%x", err);
+    Serial.printf("Camera init failed with error 0x%x\n", err);
     return cameraInitError;
   }
 
@@ -59,11 +56,16 @@ statusCode initCamera() {
   return ok;
 }
 
-void disableLamp(){
-    // Configure Lamp
-  ledcSetup(LAMP_CHANNEL, PWM_FREQ, PWM_RESOLUTION);  // configure LED PWM channel
-  ledcAttachPin(LAMP_PIN, LAMP_CHANNEL);
-  setLamp(0);
+void enableLamp() {
+  rtc_gpio_hold_dis(GPIO_NUM_4);
+  pinMode(LAMP_PIN, OUTPUT);
+  digitalWrite(LAMP_PIN, LOW);
+}
+
+void disableLamp() {
+  pinMode(LAMP_PIN, OUTPUT);
+  digitalWrite(LAMP_PIN, LOW);
+  rtc_gpio_hold_en(GPIO_NUM_4);
 }
 
 
@@ -85,12 +87,18 @@ void setLamp(int newVal) {
 
 statusCode takePicture(camera_fb_t **fb) {
   *fb = NULL;
-
+  Serial.print("Take a picture...");
   // Take Picture with Camera
   *fb = esp_camera_fb_get();
   if (!*fb) {
-    Serial.println("Camera capture failed");
+    Serial.println(" Failed.");
     return cameraTakePictureError;
   }
+  Serial.println(" Done.");
   return ok;
+}
+
+void endCamera(camera_fb_t **fb) {
+  esp_camera_fb_return(*fb);
+  disableLamp();
 }

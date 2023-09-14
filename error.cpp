@@ -9,17 +9,14 @@ void switchOffRedLed() {
 }
 
 void signalError(statusCode code) {
-  Serial.print("Signal error: ");
-  Serial.println(code);
+  Serial.printf("Signal error: %d.\n", code);
 
   // Blink the number of code
   switchOffRedLed();
-  delay(2000);
   for (int i = 0; i < code; i++) {
+    delay(250);
     switchOnRedLed();
-    delay(500);
+    delay(250);
     switchOffRedLed();
-    delay(500);
   }
-  delay(5000);
 }

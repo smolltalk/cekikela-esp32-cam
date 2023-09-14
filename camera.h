@@ -5,6 +5,7 @@
 #include "esp_camera.h"
 #include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
+#include "driver/rtc_io.h"
 #include "error.h"
 #include "config.h"
 
@@ -36,8 +37,10 @@
 #define PWM_RESOLUTION 9
 
 statusCode initCamera();
+void enableLamp();
 void disableLamp();
 void setLamp(int newVal);
 statusCode takePicture(camera_fb_t **fb);
+void endCamera(camera_fb_t **fb);
 
 #endif
