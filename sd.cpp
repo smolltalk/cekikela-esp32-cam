@@ -45,10 +45,16 @@ statusCode readFilesMetaData(FilesMetaData *filesMetaData) {
   File file = fs.open(FILES_META_DATA_FILE_NAME, FILE_READ);
   if (file) {
     char buffer[16];
-    Serial.printf("File %s open in reading mode.\n", FILES_META_DATA_FILE_NAME);
-    file.readBytes(buffer, file.available());
-    int readParamCount = sscanf(buffer, "%d,%d", &filesMetaData->pictureNumber, &filesMetaData->uploadedPictureNumber);
+    int fileLen = file.available();
+    Serial.printf("File %s open in reading mode. %d bytes to read.\n", FILES_META_DATA_FILE_NAME, fileLen);
+    file.readBytes(buffer, fileLen);
+    buffer[fileLen] = 0;
+    uint16_t pictureNumber, uploadedPictureNumber;
+    int readParamCount = sscanf(buffer, "%d,%d", &pictureNumber, &uploadedPictureNumber);
+    filesMetaData->pictureNumber = pictureNumber;
+    filesMetaData->uploadedPictureNumber = uploadedPictureNumber;
     file.close();
+    Serial.printf("Read metadata: %s\n", buffer);
     if (readParamCount == 2) {
       return ok;
     }
@@ -68,8 +74,9 @@ statusCode writeFilesMetaData(FilesMetaData *filesMetaData) {
   if (file) {
     char buffer[16];
     Serial.printf("File %s open in writing mode.\n", FILES_META_DATA_FILE_NAME);
-    statusCode result = (file.write((uint8_t*) buffer, sprintf(buffer, "%d,%d", filesMetaData->pictureNumber, filesMetaData->uploadedPictureNumber)) > 0) ? ok : sdWriteError;
+    statusCode result = (file.write((uint8_t *)buffer, sprintf(buffer, "%d,%d", filesMetaData->pictureNumber, filesMetaData->uploadedPictureNumber)) > 0) ? ok : sdWriteError;
     file.close();
+    Serial.printf("Written metadata: %s\n", buffer);
     return result;
   }
   // Else

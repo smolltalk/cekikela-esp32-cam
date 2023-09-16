@@ -7,7 +7,8 @@
 
 #define UPLOAD_SERVER_NAME "ipOrAddress"
 #define UPLOAD_SERVER_PORT 80
-#define UPLOAD_SERVER_PATH "/upload.php"
+#define UPLOAD_PATH "/upload.php"
+#define UPLOAD_AUTH "yourPass"
 
 #define FILE_NAME_RANDOM_SIZE 5
 

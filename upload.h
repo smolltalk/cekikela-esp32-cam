@@ -10,9 +10,10 @@
 #include "error.h"
 
 typedef struct {
-  char * serverName;
-  int serverPort;
-  char * uploadPath;
+  const char * serverName;
+  const int serverPort;
+  const char * uploadPath;
+  const char * auth;
 } connectionInfo_t;
 
 statusCode initWifi();

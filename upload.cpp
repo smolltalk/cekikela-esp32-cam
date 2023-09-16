@@ -38,24 +38,22 @@ DataUploader::DataUploader(connectionInfo_t *connectionInfo, uint32_t dataLen, S
   : connectionInfo(connectionInfo), dataLen(dataLen), fileName(fileName){};
 
 statusCode DataUploader::upload() {
-  String getAll;
-  String getBody;
   statusCode result = ok;
 
   Serial.printf("Connecting to server: %s\n", connectionInfo->serverName);
 
   if (client.connect(connectionInfo->serverName, connectionInfo->serverPort)) {
     Serial.println("Connection successful!");
-    String head = "--EspCamWebUpload\r\nContent-Disposition: form-data; name=\"fileToUpload\"; filename=\"" + fileName + "\"\r\nContent-Type: image/jpeg\r\n\r\n";
+    String head = "--EspCamWebUpload\r\nContent-Disposition: form-data; name=\"auth\"\r\n\r\n" + String(connectionInfo->auth) + "\r\n--EspCamWebUpload\r\nContent-Disposition: form-data; name=\"fileToUpload\"; filename=\"" + fileName + "\"\r\nContent-Type: image/jpeg\r\n\r\n";
     String tail = "\r\n--EspCamWebUpload--\r\n";
 
     uint32_t extraLen = head.length() + tail.length();
     uint32_t totalLen = dataLen + extraLen;
-
+ 
     client.print("POST ");
     client.print(connectionInfo->uploadPath);
     client.println(" HTTP/1.1");
-    client.print("Host: ");
+    client.print("Host: "); 
     client.println(connectionInfo->serverName);
     client.println("Content-Length: " + String(totalLen));
     client.println("Content-Type: multipart/form-data; boundary=EspCamWebUpload");
@@ -66,29 +64,38 @@ statusCode DataUploader::upload() {
 
     client.print(tail);
 
-    int timoutTimer = 10000;
-    long startTimer = millis();
-    boolean state = false;
+    // Read response status code
+    long startTime = millis();
+    long timeoutTime = startTime + 10000;
+    boolean statusCodeReadingStarted = false;
+    uint8_t statusCodeReadingPosition = 0;
+    char statusCodeStr[4];
 
-    while ((startTimer + timoutTimer) > millis()) {
+    while (millis() < timeoutTime) {
       Serial.print(".");
       delay(100);
       while (client.available()) {
         char c = client.read();
-        if (c == '\n') {
-          if (getAll.length() == 0) { state = true; }
-          getAll = "";
-        } else if (c != '\r') {
-          getAll += String(c);
+        if (!statusCodeReadingStarted) {
+          statusCodeReadingStarted = (c == ' ');
+        } else {
+          if (statusCodeReadingPosition == 3 || c == ' ') {
+            // status code read => break
+            break;
+          } else {
+            // status code recording
+            statusCodeStr[statusCodeReadingPosition++] = c;
+          }
         }
-        if (state == true) { getBody += String(c); }
-        startTimer = millis();
       }
-      if (getBody.length() > 0) { break; }
     }
-    Serial.println();
     client.stop();
-    Serial.println(getBody);
+    // End char array with \0
+    statusCodeStr[statusCodeReadingPosition] = 0;
+    // Convert status code to int
+    int statusCode = atoi(statusCodeStr);
+    Serial.printf("\nResponse status code: %d\n", statusCode);
+    result = statusCode == 200 ? ok : uploadPictureError;
   } else { 
     Serial.printf("Connection to %s failed.\n", connectionInfo->serverName);
     result = uploadPictureError;
@@ -122,8 +129,7 @@ void FileDataUploader::sendData() {
   uint8_t buf[256];
   size_t len = file.available();
   while (len) {
-    file.read(buf, len < 256 ? len : (uint16_t)256);
-    client.write(buf, 256);
+    client.write(buf, file.read(buf, len < 256 ? len : (uint16_t)256));
     len = file.available();
   }
 }

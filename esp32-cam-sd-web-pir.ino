@@ -44,7 +44,7 @@ statusCode runActions() {
   camera_fb_t *fb = NULL;
   char pictureName[20];
   FilesMetaData filesMetaData;
-  connectionInfo_t connectionInfo = { .serverName = UPLOAD_SERVER_NAME, .serverPort = UPLOAD_SERVER_PORT, .uploadPath = UPLOAD_SERVER_PATH };
+  connectionInfo_t connectionInfo = { .serverName = UPLOAD_SERVER_NAME, .serverPort = UPLOAD_SERVER_PORT, .uploadPath = UPLOAD_PATH, .auth = UPLOAD_AUTH };
 
   // Init camera
   if ((result = initCamera()) != ok) {
