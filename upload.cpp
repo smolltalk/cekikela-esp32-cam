@@ -44,6 +44,8 @@ statusCode DataUploader::upload() {
 
   if (client.connect(connectionInfo->serverName, connectionInfo->serverPort)) {
     Serial.println("Connection successful!");
+    Serial.printf("Uploading file %s...\n", fileName);
+
     String head = "--EspCamWebUpload\r\nContent-Disposition: form-data; name=\"auth\"\r\n\r\n" + String(connectionInfo->auth) + "\r\n--EspCamWebUpload\r\nContent-Disposition: form-data; name=\"fileToUpload\"; filename=\"" + fileName + "\"\r\nContent-Type: image/jpeg\r\n\r\n";
     String tail = "\r\n--EspCamWebUpload--\r\n";
 
@@ -139,8 +141,6 @@ statusCode uploadPictureFile(connectionInfo_t *connectionInfo, uint16_t i) {
   // Path where new picture will be saved in SD Card
   char pictureFilePath[20] = "/";
   computePictureNameFromIndex(pictureFilePath + 1, i);
-  Serial.print("Upload file ");
-  Serial.println(pictureFilePath);
 
   fs::FS &fs = SD_MMC;
   Serial.printf("Picture file name: %s\n", pictureFilePath);
