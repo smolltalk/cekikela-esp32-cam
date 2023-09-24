@@ -25,6 +25,7 @@
 #include "sd.h"
 #include "error.h"
 #include "filename.h"
+#include "timemgt.h"
 
 void zzzzZZZZ() {
   // Switch off the red led to inform that the program is stopped
@@ -33,6 +34,8 @@ void zzzzZZZZ() {
   Serial.flush();
   // Wake up on up edge on pin 12
   esp_sleep_enable_ext0_wakeup(GPIO_NUM_12, 1);
+  // Wake up in TIME_TO_SLEEP seconds
+  esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
   // Go to sleep
   esp_deep_sleep_start();
   Serial.println("This will never be printed");

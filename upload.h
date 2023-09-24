@@ -2,12 +2,13 @@
 #define UPLOADER_H
 
 #include "Arduino.h"
-#include <HTTPClient.h>
+#include "wifimgt.h"
 #include "FS.h"
 #include "config.h"
 #include "sd.h"
 #include "filename.h"
 #include "error.h"
+#include "timemgt.h"
 
 typedef struct {
   const char * serverName;
@@ -16,8 +17,6 @@ typedef struct {
   const char * auth;
 } connectionInfo_t;
 
-statusCode initWifi();
-void endWifi();
 statusCode uploadPictureFile(connectionInfo_t * connectionInfo, uint16_t i);
 bool canUploadPictures(FilesMetaData * filesMetaData);
 statusCode uploadPictureFiles(connectionInfo_t * connectionInfo, FilesMetaData * filesMetaData);

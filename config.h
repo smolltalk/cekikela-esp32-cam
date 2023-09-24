@@ -22,4 +22,7 @@
 // Duration to wait until the camera is ready in ms
 #define CAMERA_GET_READY_DURATION 1500
 
+#define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
+#define TIME_TO_SLEEP  5        /* Time ESP32 will go to sleep (in seconds) */
+
 #endif
