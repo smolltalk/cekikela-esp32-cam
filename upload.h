@@ -4,31 +4,36 @@
 #include "Arduino.h"
 #include "wifimgt.h"
 #include "FS.h"
-#include "config.h"
 #include "sd.h"
 #include "filename.h"
 #include "error.h"
 #include "timemgt.h"
 
-typedef struct {
-  const char * serverName;
-  const int serverPort;
-  const char * uploadPath;
-  const char * auth;
-} connectionInfo_t;
+#define SERVER_NAME_MAX_SIZE 64
+#define UPLOAD_PATH_MAX_SIZE 64
+#define AUTH_PATH_MAX_SIZE 32
 
-statusCode uploadPictureFile(connectionInfo_t * connectionInfo, uint16_t i);
-bool canUploadPictures(FilesMetaData * filesMetaData);
-statusCode uploadPictureFiles(connectionInfo_t * connectionInfo, FilesMetaData * filesMetaData);
-statusCode uploadPicture(connectionInfo_t * connectionInfo, char * pictureName, uint8_t * buf, size_t len);
+typedef struct {
+  char serverName[SERVER_NAME_MAX_SIZE + 1];
+  int serverPort;
+  char uploadPath[UPLOAD_PATH_MAX_SIZE + 1];
+  char auth[AUTH_PATH_MAX_SIZE + 1];
+  uint8_t bunchSize;
+  uint8_t fileNameRandSize;
+} uploadInfo_t;
+
+statusCode uploadPictureFile(uploadInfo_t * uploadInfo, uint16_t i);
+bool canUploadPictures(uint8_t bunchSize, FilesMetaData * filesMetaData);
+statusCode uploadPictureFiles(wifiInfo_t * wifiInfo, uploadInfo_t * uploadInfo, FilesMetaData * filesMetaData);
+statusCode uploadPicture(wifiInfo_t * wifiInfo, uploadInfo_t * uploadInfo, char * pictureName, uint8_t * buf, size_t len);
 
 class DataUploader {
 public:
-  DataUploader(connectionInfo_t * connectionInfo, uint32_t dataLen, String fileName);
+  DataUploader(uploadInfo_t * uploadInfo, uint32_t dataLen, String fileName);
   statusCode upload();
 
 protected:
-  connectionInfo_t * connectionInfo;
+  uploadInfo_t * uploadInfo;
   uint32_t dataLen;
   String fileName;
   WiFiClient client;
@@ -40,7 +45,7 @@ private:
 class BufferDataUploader : public DataUploader {
 
 public:
-  BufferDataUploader(connectionInfo_t * connectionInfo, uint8_t * buf, size_t len, String fileName);
+  BufferDataUploader(uploadInfo_t * uploadInfo, uint8_t * buf, size_t len, String fileName);
 
 private:
   uint8_t * buf;
@@ -51,7 +56,7 @@ private:
 
 class FileDataUploader : public DataUploader {
 public:
-  FileDataUploader(connectionInfo_t * connectionInfo, File file);
+  FileDataUploader(uploadInfo_t * uploadInfo, File file);
 
 private:
   File file;

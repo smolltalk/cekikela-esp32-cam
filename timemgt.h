@@ -6,6 +6,6 @@
 #include "time.h"
 #include "wifimgt.h"
 
-void updateTime();
+void updateTime(wifiInfo_t * wifiInfo);
 
 #endif

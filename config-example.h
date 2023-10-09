@@ -1,20 +1,42 @@
-#define SAVE_PICTURE_ON_SD_CARD 1
-#define UPLOAD_PICTURE 0
+#ifndef CONFIG_H
+#define CONFIG_H
 
-#define WIFI_SSID "wifiSsid"
-#define WIFI_PASSWORD "wifiPassword"
-#define WIFI_CONNECT_MAX_ATTEMPTS 30
+#include "cfgmgt.h"
 
-#define UPLOAD_SERVER_NAME "ipOrAddress"
-#define UPLOAD_SERVER_PORT 80
-#define UPLOAD_PATH "/upload.php"
-#define UPLOAD_AUTH "yourPass"
+appConfig_t appConfig = {
+  .readConfigOnSdCard = true,
+  .configOnSdCardRead = false,
+  .savePictureOnSdCard = true,
+  .uploadPicture = false,
+  .cameraGetReadyDurationMs = 1500,
+  .awakeDurationMs = 5000,
+  .wifiInfo = {
+    .ssid = "My Wifi SSID",
+    .password = "My Wifi Password",
+    .connectAttemptMax = 30
+  },
+  .uploadInfo = {
+    .serverName = "IP address or FQDN",
+    .serverPort = 80,
+    .uploadPath = "/upload.php",
+    .auth = "an auth string",
+    .bunchSize = 2,
+    .fileNameRandSize = 5
+  }
+};
 
-#define FILE_NAME_RANDOM_SIZE 5
+// TODO
+// - Create config structure
+// - Init a default config structure
+// - Write Readme.md
+// - Override config from SD file
+// - Split files.mtd into upload-count.mtd and file-count.mtd
+// - Make possible to take pictures periodically
+// - OTA
+// - DURATION_WAKEUP ? ON ISR ?
+// - Read config on SD Card once
 
-#define UPLOAD_BUNCH_SIZE 10
+#define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
+#define TIME_TO_SLEEP  5        /* Time ESP32 will go to sleep (in seconds) */
 
-#define AWAKE_DURATION 5000
-
-// Duration to wait until the camera is ready in ms
-#define CAMERA_GET_READY_DURATION 1500
+#endif

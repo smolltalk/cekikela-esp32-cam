@@ -1,6 +1,6 @@
 #include "timemgt.h"
 
-void updateTime() {
+void updateTime(wifiInfo_t * wifiInfo) {
   const char* ntpServer = "pool.ntp.org";
   const long gmtOffset_sec = 0;
   const int daylightOffset_sec = 3600;
@@ -19,7 +19,7 @@ void updateTime() {
     updateTimeFromNtp = true;
   }
   if (updateTimeFromNtp) {
-    if (initWifi() == ok) {
+    if (initWifi(wifiInfo) == ok) {
       configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
       if (getLocalTime(&timeInfo)) {
         Serial.println("Time updated.");

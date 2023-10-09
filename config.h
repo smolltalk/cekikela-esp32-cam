@@ -1,26 +1,39 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define SAVE_PICTURE_ON_SD_CARD 0
-#define UPLOAD_PICTURE 1
+#include "cfgmgt.h"
 
-#define WIFI_SSID "Freebox-778319"
-#define WIFI_PASSWORD "xxt6wq59kfqk63hdqxxzkm"
-#define WIFI_CONNECT_MAX_ATTEMPTS 30
+RTC_DATA_ATTR appConfig_t appConfig = {
+  .readConfigOnSdCard = true,
+  .configOnSdCardRead = false,
+  .savePictureOnSdCard = true,
+  .uploadPicture = true,
+  .cameraGetReadyDurationMs = 1500,
+  .awakeDurationMs = 5000,
+  .wifiInfo = {
+    {.ssid = "Freebox-778319"},
+    {.password = "xxt6wq59kfqk63hdqxxzkm"},
+    .connectAttemptMax = 30
+  },
+  .uploadInfo = {
+    {.serverName = "37.27.8.236"},
+    .serverPort = 80,
+    {.uploadPath = "/upload.php"},
+    {.auth = "bigblackbird"},
+    .bunchSize = 2,
+    .fileNameRandSize = 5
+  }
+};
 
-#define UPLOAD_SERVER_NAME "37.27.8.236"
-#define UPLOAD_SERVER_PORT 80
-#define UPLOAD_PATH "/upload.php"
-#define UPLOAD_AUTH "bigblackbird"
-
-#define FILE_NAME_RANDOM_SIZE 5
-
-#define UPLOAD_BUNCH_SIZE 2
-
-#define AWAKE_DURATION 5000
-
-// Duration to wait until the camera is ready in ms
-#define CAMERA_GET_READY_DURATION 1500
+// TODO
+// - Write Readme.md
+// - Split files.mtd into upload-count.mtd and file-count.mtd
+// - Make possible to take pictures periodically
+// - OTA
+// - DURATION_WAKEUP ? ON ISR ?
+// - Add camera parameters to config
+// - Config: use [category]
+// - Config: comparing acceleration using bitmap 
 
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
 #define TIME_TO_SLEEP  5        /* Time ESP32 will go to sleep (in seconds) */

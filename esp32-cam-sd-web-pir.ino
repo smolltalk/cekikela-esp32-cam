@@ -17,15 +17,15 @@
   copies or substantial portions of the Software.
 *********/
 
-// TODO DURATION_WAKEUP ? ON ISR ?
-// TODO avoid String in upload
-
 #include "camera.h"
 #include "upload.h"
 #include "sd.h"
 #include "error.h"
 #include "filename.h"
 #include "timemgt.h"
+#include "wifimgt.h"
+#include "cfgmgt.h"
+#include "config.h"
 
 void zzzzZZZZ() {
   // Switch off the red led to inform that the program is stopped
@@ -47,10 +47,11 @@ statusCode runActions() {
   camera_fb_t *fb = NULL;
   char pictureName[20];
   FilesMetaData filesMetaData;
-  connectionInfo_t connectionInfo = { .serverName = UPLOAD_SERVER_NAME, .serverPort = UPLOAD_SERVER_PORT, .uploadPath = UPLOAD_PATH, .auth = UPLOAD_AUTH };
-
+  wifiInfo_t * wifiInfo = &(appConfig.wifiInfo);
+  uploadInfo_t * uploadInfo = &(appConfig.uploadInfo);
+  
   // Init camera
-  if ((result = initCamera()) != ok) {
+  if ((result = initCamera(appConfig.cameraGetReadyDurationMs)) != ok) {
     return result;
   }
 
@@ -59,7 +60,13 @@ statusCode runActions() {
     return result;
   }
 
-  if (SAVE_PICTURE_ON_SD_CARD) {
+  // Try to read appConfig on SD card
+  readConfigOnSDCard(&appConfig);
+
+  // Sync time with NTP
+  updateTime(wifiInfo);
+
+  if (appConfig.savePictureOnSdCard) {
     // Writing on SD card involves flash lighting
     disableLamp();
     if ((result = initSDCard()) == ok && (result = readOrCreateFilesMetaData(&filesMetaData)) == ok) {
@@ -71,22 +78,22 @@ statusCode runActions() {
       }
     }
   }
-  if (UPLOAD_PICTURE) {
+  if (appConfig.uploadPicture) {
     if (!pictureSavedOnSd) {
       statusCode uploadResult;
       // Failed to saved on SD card, then try to upload.
-      computePictureNameFromRandom(pictureName);
-      uploadResult = uploadPicture(&connectionInfo, pictureName, fb->buf, fb->len);
+      computePictureNameFromRandom(pictureName, uploadInfo->fileNameRandSize);
+      uploadResult = uploadPicture(wifiInfo, uploadInfo, pictureName, fb->buf, fb->len);
       // Don't override result when result already contains an error code.
       if (result == ok) {
         result = uploadResult;
       }
     } else {
       // Upload a bunch of files.
-      result = uploadPictureFiles(&connectionInfo, &filesMetaData);
+      result = uploadPictureFiles(wifiInfo, uploadInfo, &filesMetaData);
     }
-    endWifi();
   }
+  endWifi();
   endSDCard();
   endCamera(&fb);
 
@@ -109,7 +116,7 @@ void setup() {
   signalError(result);
 
   // Wait to avoid photo galore
-  delay(AWAKE_DURATION);
+  delay(appConfig.awakeDurationMs);
   // Go to sleep
   zzzzZZZZ();
 }

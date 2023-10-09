@@ -14,7 +14,8 @@ enum statusCode {
   sdReadError = 4,
   sdWriteError = 5,
   uploadWifiInitError = 6,
-  uploadPictureError = 7
+  uploadPictureError = 7,
+  readConfigError = 8
 };
 
 void switchOnRedLed();

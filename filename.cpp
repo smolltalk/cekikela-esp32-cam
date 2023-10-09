@@ -17,8 +17,8 @@ void computePictureNameFromIndex(char * pictureName, uint16_t index){
   sprintf(pictureName, "pic-%05d.jpg", index);
 }
 
-void computePictureNameFromRandom(char * pictureName){
-  char sRandom[FILE_NAME_RANDOM_SIZE + 1];
-  fillWithRandom(sRandom, FILE_NAME_RANDOM_SIZE);
+void computePictureNameFromRandom(char * pictureName, uint8_t size){
+  char sRandom[size + 1];
+  fillWithRandom(sRandom, size);
   sprintf(pictureName, "pic-%s.jpg", sRandom);
 }

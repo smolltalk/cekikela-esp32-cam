@@ -7,7 +7,6 @@
 #include "soc/rtc_cntl_reg.h"
 #include "driver/rtc_io.h"
 #include "error.h"
-#include "config.h"
 
 // Pin definition for CAMERA_MODEL_AI_THINKER
 #define PWDN_GPIO_NUM 32
@@ -36,7 +35,7 @@
 // duty cycle bit range
 #define PWM_RESOLUTION 9
 
-statusCode initCamera();
+statusCode initCamera(uint16_t cameraGetReadyDurationMs);
 void enableLamp();
 void disableLamp();
 void setLamp(int newVal);

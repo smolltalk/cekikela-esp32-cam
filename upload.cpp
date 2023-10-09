@@ -1,28 +1,28 @@
 #include "upload.h"
 
-DataUploader::DataUploader(connectionInfo_t *connectionInfo, uint32_t dataLen, String fileName)
-  : connectionInfo(connectionInfo), dataLen(dataLen), fileName(fileName){};
+DataUploader::DataUploader(uploadInfo_t *uploadInfo, uint32_t dataLen, String fileName)
+  : uploadInfo(uploadInfo), dataLen(dataLen), fileName(fileName){};
 
 statusCode DataUploader::upload() {
   statusCode result = ok;
 
-  Serial.printf("Connecting to server: %s\n", connectionInfo->serverName);
+  Serial.printf("Connecting to server: %s\n", uploadInfo->serverName);
 
-  if (client.connect(connectionInfo->serverName, connectionInfo->serverPort)) {
+  if (client.connect(uploadInfo->serverName, uploadInfo->serverPort)) {
     Serial.println("Connection successful!");
     Serial.printf("Uploading file %s...\n", fileName);
 
-    String head = "--EspCamWebUpload\r\nContent-Disposition: form-data; name=\"auth\"\r\n\r\n" + String(connectionInfo->auth) + "\r\n--EspCamWebUpload\r\nContent-Disposition: form-data; name=\"fileToUpload\"; filename=\"" + fileName + "\"\r\nContent-Type: image/jpeg\r\n\r\n";
+    String head = "--EspCamWebUpload\r\nContent-Disposition: form-data; name=\"auth\"\r\n\r\n" + String(uploadInfo->auth) + "\r\n--EspCamWebUpload\r\nContent-Disposition: form-data; name=\"fileToUpload\"; filename=\"" + fileName + "\"\r\nContent-Type: image/jpeg\r\n\r\n";
     String tail = "\r\n--EspCamWebUpload--\r\n";
 
     uint32_t extraLen = head.length() + tail.length();
     uint32_t totalLen = dataLen + extraLen;
  
     client.print("POST ");
-    client.print(connectionInfo->uploadPath);
+    client.print(uploadInfo->uploadPath);
     client.println(" HTTP/1.1");
     client.print("Host: "); 
-    client.println(connectionInfo->serverName);
+    client.println(uploadInfo->serverName);
     client.println("Content-Length: " + String(totalLen));
     client.println("Content-Type: multipart/form-data; boundary=EspCamWebUpload");
     client.println();
@@ -65,7 +65,7 @@ statusCode DataUploader::upload() {
     Serial.printf("\nResponse status code: %d\n", statusCode);
     result = statusCode == 200 ? ok : uploadPictureError;
   } else { 
-    Serial.printf("Connection to %s failed.\n", connectionInfo->serverName);
+    Serial.printf("Connection to %s failed.\n", uploadInfo->serverName);
     result = uploadPictureError;
   }
   return result;
@@ -73,8 +73,8 @@ statusCode DataUploader::upload() {
 
 void DataUploader::sendData() {}
 
-BufferDataUploader::BufferDataUploader(connectionInfo_t *connectionInfo, uint8_t *buf, size_t len, String fileName)
-  : DataUploader(connectionInfo, len, fileName), buf(buf){};
+BufferDataUploader::BufferDataUploader(uploadInfo_t *uploadInfo, uint8_t *buf, size_t len, String fileName)
+  : DataUploader(uploadInfo, len, fileName), buf(buf){};
 
 void BufferDataUploader::sendData() {
   uint8_t *iBuf = buf;
@@ -90,8 +90,8 @@ void BufferDataUploader::sendData() {
   }
 }
 
-FileDataUploader::FileDataUploader(connectionInfo_t *connectionInfo, File file)
-  : DataUploader(connectionInfo, file.size(), file.name()), file{ file } {};
+FileDataUploader::FileDataUploader(uploadInfo_t *uploadInfo, File file)
+  : DataUploader(uploadInfo, file.size(), file.name()), file{ file } {};
 
 void FileDataUploader::sendData() {
   uint8_t buf[256];
@@ -102,7 +102,7 @@ void FileDataUploader::sendData() {
   }
 }
 
-statusCode uploadPictureFile(connectionInfo_t *connectionInfo, uint16_t i) {
+statusCode uploadPictureFile(uploadInfo_t *uploadInfo, uint16_t i) {
   statusCode result = ok;
   // Path where new picture will be saved in SD Card
   char pictureFilePath[20] = "/";
@@ -116,24 +116,24 @@ statusCode uploadPictureFile(connectionInfo_t *connectionInfo, uint16_t i) {
     Serial.printf("Failed to open file %s in reading mode\n", pictureFilePath);
     result = uploadPictureError;
   } else {
-    FileDataUploader fdu(connectionInfo, file);
+    FileDataUploader fdu(uploadInfo, file);
     result = fdu.upload();
   }
   file.close();
   return result;
 }
 
-bool canUploadPictures(FilesMetaData *filesMetaData) {
-  return (filesMetaData->pictureNumber - filesMetaData->uploadedPictureNumber >= UPLOAD_BUNCH_SIZE);
+bool canUploadPictures(uint8_t bunchSize, FilesMetaData *filesMetaData) {
+  return (filesMetaData->pictureNumber - filesMetaData->uploadedPictureNumber >= bunchSize);
 }
 
-statusCode uploadPictureFiles(connectionInfo_t *connectionInfo, FilesMetaData *filesMetaData) {
+statusCode uploadPictureFiles(wifiInfo_t * wifiInfo, uploadInfo_t *uploadInfo, FilesMetaData *filesMetaData) {
   statusCode result = ok;
-  if (canUploadPictures(filesMetaData)) {
-    result = initWifi();
+  if (canUploadPictures(uploadInfo->bunchSize, filesMetaData)) {
+    result = initWifi(wifiInfo);
     if (result == ok) {
       for (uint16_t i = filesMetaData->uploadedPictureNumber + 1; i <= filesMetaData->pictureNumber; i++) {
-        result = uploadPictureFile(connectionInfo, i);
+        result = uploadPictureFile(uploadInfo, i);
         if (result == ok) {
           filesMetaData->uploadedPictureNumber++;
         } else {
@@ -146,11 +146,11 @@ statusCode uploadPictureFiles(connectionInfo_t *connectionInfo, FilesMetaData *f
   return result;
 }
 
-statusCode uploadPicture(connectionInfo_t *connectionInfo, char *pictureName, uint8_t *buf, size_t len) {
+statusCode uploadPicture(wifiInfo_t * wifiInfo, uploadInfo_t *uploadInfo, char *pictureName, uint8_t *buf, size_t len) {
   statusCode result = ok;
-  result = initWifi();
+  result = initWifi(wifiInfo);
   if (result == ok) {
-    BufferDataUploader bdu(connectionInfo, buf, len, String(pictureName));
+    BufferDataUploader bdu(uploadInfo, buf, len, String(pictureName));
     result = bdu.upload();
   }
   return result;

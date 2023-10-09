@@ -1,13 +1,20 @@
 #include "sd.h"
 
 statusCode initSDCard() {
-  //Serial.println("Starting SD Card");
-  // Fix SD card initialization
+  uint8_t cardType = SD_MMC.cardType();
+
+  // SD card has been already initialized?
+  if (cardType != CARD_NONE) {
+    return ok;
+  }
+
+  // Initialize SD card
   if (!SD_MMC.begin("/sdcard", true)) {
     Serial.println("SD Card Mount Failed.");
     return sdInitError;
   }
-  uint8_t cardType = SD_MMC.cardType();
+  
+  cardType = SD_MMC.cardType();
 
   if (cardType == CARD_NONE) {
     Serial.println("No SD card attached.");

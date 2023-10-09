@@ -1,6 +1,6 @@
 #include "wifimgt.h"
 
-statusCode initWifi() {
+statusCode initWifi(wifiInfo_t * wifiInfo) {
   statusCode result = ok;
   // We start by connecting to a WiFi network
   Serial.println();
@@ -11,12 +11,12 @@ statusCode initWifi() {
   }
   // Try to connect
   Serial.print("Connecting to ");
-  Serial.println(WIFI_SSID);
+  Serial.println(wifiInfo->ssid);
 
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  WiFi.begin(wifiInfo->ssid, wifiInfo->password);
 
   int connectAttemptCount = 0;
-  while (WiFi.status() != WL_CONNECTED && connectAttemptCount < WIFI_CONNECT_MAX_ATTEMPTS) {
+  while (WiFi.status() != WL_CONNECTED && connectAttemptCount < wifiInfo->connectAttemptMax) {
     delay(500);
     Serial.print(".");
     connectAttemptCount++;

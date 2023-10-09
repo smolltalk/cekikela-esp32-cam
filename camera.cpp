@@ -1,6 +1,6 @@
 #include "camera.h"
 
-statusCode initCamera() {
+statusCode initCamera(uint16_t cameraGetReadyDurationMs) {
   // Disable brownout detector
   // https://iotespresso.com/how-to-disable-brownout-detector-in-esp32-in-arduino/
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
@@ -52,7 +52,7 @@ statusCode initCamera() {
 
   // Wait until camera is ready: avoid green dark pictures.
   // Less than 1s does not work.
-  delay(CAMERA_GET_READY_DURATION);
+  delay(cameraGetReadyDurationMs);
   return ok;
 }
 
