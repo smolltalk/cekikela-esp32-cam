@@ -23,8 +23,8 @@ typedef struct {
 } uploadInfo_t;
 
 statusCode uploadPictureFile(uploadInfo_t * uploadInfo, uint16_t i);
-bool canUploadPictures(uint8_t bunchSize, FilesMetaData * filesMetaData);
-statusCode uploadPictureFiles(wifiInfo_t * wifiInfo, uploadInfo_t * uploadInfo, FilesMetaData * filesMetaData);
+bool canUploadPictures(uint8_t bunchSize, FilesCounters * filesCounters);
+statusCode uploadPictureFiles(wifiInfo_t * wifiInfo, uploadInfo_t * uploadInfo, FilesCounters * filesCounters);
 statusCode uploadPicture(wifiInfo_t * wifiInfo, uploadInfo_t * uploadInfo, char * pictureName, uint8_t * buf, size_t len);
 
 class DataUploader {

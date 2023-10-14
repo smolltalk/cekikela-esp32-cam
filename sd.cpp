@@ -45,21 +45,21 @@ void endSDCard() {
   SD_MMC.end();
 }
 
-statusCode readFilesMetaData(FilesMetaData *filesMetaData) {
-  Serial.println("readFilesMetaData...");
+statusCode readFilesCounters(FilesCounters *filesCounters) {
+  Serial.println("readFilesCounters...");
   fs::FS &fs = SD_MMC;
-  Serial.printf("File %s %s.\n", FILES_META_DATA_FILE_NAME, fs.exists(FILES_META_DATA_FILE_NAME) ? "exists" : "does not exist");
-  File file = fs.open(FILES_META_DATA_FILE_NAME, FILE_READ);
+  Serial.printf("File %s %s.\n", FILES_COUNTERS_FILE_NAME, fs.exists(FILES_COUNTERS_FILE_NAME) ? "exists" : "does not exist");
+  File file = fs.open(FILES_COUNTERS_FILE_NAME, FILE_READ);
   if (file) {
     char buffer[16];
     int fileLen = file.available();
-    Serial.printf("File %s open in reading mode. %d bytes to read.\n", FILES_META_DATA_FILE_NAME, fileLen);
+    Serial.printf("File %s open in reading mode. %d bytes to read.\n", FILES_COUNTERS_FILE_NAME, fileLen);
     file.readBytes(buffer, fileLen);
     buffer[fileLen] = 0;
     uint16_t pictureNumber, uploadedPictureNumber;
     int readParamCount = sscanf(buffer, "%d,%d", &pictureNumber, &uploadedPictureNumber);
-    filesMetaData->pictureNumber = pictureNumber;
-    filesMetaData->uploadedPictureNumber = uploadedPictureNumber;
+    filesCounters->pictureNumber = pictureNumber;
+    filesCounters->uploadedPictureNumber = uploadedPictureNumber;
     file.close();
     Serial.printf("Read metadata: %s\n", buffer);
     if (readParamCount == 2) {
@@ -70,37 +70,37 @@ statusCode readFilesMetaData(FilesMetaData *filesMetaData) {
     return sdReadError;
   }
   // Else
-  Serial.printf("Failed to open file %s in reading mode.\n", FILES_META_DATA_FILE_NAME);
+  Serial.printf("Failed to open file %s in reading mode.\n", FILES_COUNTERS_FILE_NAME);
   return sdReadError;
 }
 
-statusCode writeFilesMetaData(FilesMetaData *filesMetaData) {
-  Serial.println("writeFilesMetaData...");
+statusCode writeFilesCounters(FilesCounters *filesCounters) {
+  Serial.println("writeFilesCounters...");
   fs::FS &fs = SD_MMC;
-  File file = fs.open(FILES_META_DATA_FILE_NAME, FILE_WRITE);
+  File file = fs.open(FILES_COUNTERS_FILE_NAME, FILE_WRITE);
   if (file) {
     char buffer[16];
-    Serial.printf("File %s open in writing mode.\n", FILES_META_DATA_FILE_NAME);
-    statusCode result = (file.write((uint8_t *)buffer, sprintf(buffer, "%d,%d", filesMetaData->pictureNumber, filesMetaData->uploadedPictureNumber)) > 0) ? ok : sdWriteError;
+    Serial.printf("File %s open in writing mode.\n", FILES_COUNTERS_FILE_NAME);
+    statusCode result = (file.write((uint8_t *)buffer, sprintf(buffer, "%d,%d", filesCounters->pictureNumber, filesCounters->uploadedPictureNumber)) > 0) ? ok : sdWriteError;
     file.close();
     Serial.printf("Written metadata: %s\n", buffer);
     return result;
   }
   // Else
-  Serial.printf("Failed to open file %s in writing mode.\n", FILES_META_DATA_FILE_NAME);
+  Serial.printf("Failed to open file %s in writing mode.\n", FILES_COUNTERS_FILE_NAME);
   return sdWriteError;
 }
 
-statusCode createFilesMetaData(FilesMetaData *filesMetaData) {
-  Serial.println("createFilesMetaData...");
-  filesMetaData->pictureNumber = 0;
-  filesMetaData->uploadedPictureNumber = 0;
-  return writeFilesMetaData(filesMetaData);
+statusCode createFilesCounters(FilesCounters *filesCounters) {
+  Serial.println("createFilesCounters...");
+  filesCounters->pictureNumber = 0;
+  filesCounters->uploadedPictureNumber = 0;
+  return writeFilesCounters(filesCounters);
 }
 
-statusCode readOrCreateFilesMetaData(FilesMetaData *filesMetaData) {
-  Serial.println("readOrCreateFilesMetaData...");
-  return (readFilesMetaData(filesMetaData) == ok) ? ok : createFilesMetaData(filesMetaData);
+statusCode readOrCreateFilesCounters(FilesCounters *filesCounters) {
+  Serial.println("readOrCreateFilesCounters...");
+  return (readFilesCounters(filesCounters) == ok) ? ok : createFilesCounters(filesCounters);
 }
 
 statusCode savePictureOnSDCard(char *pictureName, uint8_t *buf, size_t len) {

@@ -46,7 +46,7 @@ statusCode runActions() {
   bool pictureSavedOnSd = false;
   camera_fb_t *fb = NULL;
   char pictureName[20];
-  FilesMetaData filesMetaData;
+  FilesCounters filesCounters;
   wifiInfo_t * wifiInfo = &(appConfig.wifiInfo);
   uploadInfo_t * uploadInfo = &(appConfig.uploadInfo);
   
@@ -69,11 +69,11 @@ statusCode runActions() {
   if (appConfig.savePictureOnSdCard) {
     // Writing on SD card involves flash lighting
     disableLamp();
-    if ((result = initSDCard()) == ok && (result = readOrCreateFilesMetaData(&filesMetaData)) == ok) {
-      computePictureNameFromIndex(pictureName, filesMetaData.pictureNumber + 1);
+    if ((result = initSDCard()) == ok && (result = readOrCreateFilesCounters(&filesCounters)) == ok) {
+      computePictureNameFromIndex(pictureName, filesCounters.pictureNumber + 1);
       if ((result = savePictureOnSDCard(pictureName, fb->buf, fb->len)) == ok) {
-        filesMetaData.pictureNumber++;
-        writeFilesMetaData(&filesMetaData);
+        filesCounters.pictureNumber++;
+        writeFilesCounters(&filesCounters);
         pictureSavedOnSd = true;
       }
     }
@@ -90,7 +90,7 @@ statusCode runActions() {
       }
     } else {
       // Upload a bunch of files.
-      result = uploadPictureFiles(wifiInfo, uploadInfo, &filesMetaData);
+      result = uploadPictureFiles(wifiInfo, uploadInfo, &filesCounters);
     }
   }
   endWifi();

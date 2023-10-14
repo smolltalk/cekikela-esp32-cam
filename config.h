@@ -27,7 +27,6 @@ RTC_DATA_ATTR appConfig_t appConfig = {
 
 // TODO
 // - Write Readme.md
-// - Split files.mtd into upload-count.mtd and file-count.mtd
 // - Make possible to take pictures periodically
 // - OTA
 // - DURATION_WAKEUP ? ON ISR ?
