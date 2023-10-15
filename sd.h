@@ -1,15 +1,16 @@
 #ifndef SD_H
 #define SD_H
 
+#include "error.h"
 #include "FS.h"
 #include "SD_MMC.h"
-#include "error.h"
+#include <SDConfig.h>
 
 #define FILES_COUNTERS_FILE_NAME "/counters.txt"
 
 typedef struct {
-  uint16_t pictureNumber;
-  uint16_t uploadedPictureNumber;
+  uint16_t pictureCounter;
+  uint16_t uploadedPictureCounter;
 } FilesCounters;
 
 statusCode initSDCard();

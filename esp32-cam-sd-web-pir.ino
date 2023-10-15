@@ -27,15 +27,22 @@
 #include "cfgmgt.h"
 #include "config.h"
 
+#define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
+
 void zzzzZZZZ() {
   // Switch off the red led to inform that the program is stopped
   switchOffRedLed();
   Serial.println("Going to sleep now.");
   Serial.flush();
-  // Wake up on up edge on pin 12
+
+  // Wake up on PIR, ie on up edge on pin 12
   esp_sleep_enable_ext0_wakeup(GPIO_NUM_12, 1);
+  
   // Wake up in TIME_TO_SLEEP seconds
-  esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+  if (appConfig.awakePeriodSec) {
+    esp_sleep_enable_timer_wakeup(appConfig.awakePeriodSec * uS_TO_S_FACTOR);
+  }
+
   // Go to sleep
   esp_deep_sleep_start();
   Serial.println("This will never be printed");
@@ -70,9 +77,9 @@ statusCode runActions() {
     // Writing on SD card involves flash lighting
     disableLamp();
     if ((result = initSDCard()) == ok && (result = readOrCreateFilesCounters(&filesCounters)) == ok) {
-      computePictureNameFromIndex(pictureName, filesCounters.pictureNumber + 1);
+      computePictureNameFromIndex(pictureName, filesCounters.pictureCounter + 1);
       if ((result = savePictureOnSDCard(pictureName, fb->buf, fb->len)) == ok) {
-        filesCounters.pictureNumber++;
+        filesCounters.pictureCounter++;
         writeFilesCounters(&filesCounters);
         pictureSavedOnSd = true;
       }

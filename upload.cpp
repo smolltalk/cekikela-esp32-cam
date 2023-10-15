@@ -124,7 +124,7 @@ statusCode uploadPictureFile(uploadInfo_t *uploadInfo, uint16_t i) {
 }
 
 bool canUploadPictures(uint8_t bunchSize, FilesCounters *filesCounters) {
-  return (filesCounters->pictureNumber - filesCounters->uploadedPictureNumber >= bunchSize);
+  return (filesCounters->pictureCounter - filesCounters->uploadedPictureCounter >= bunchSize);
 }
 
 statusCode uploadPictureFiles(wifiInfo_t * wifiInfo, uploadInfo_t *uploadInfo, FilesCounters *filesCounters) {
@@ -132,10 +132,10 @@ statusCode uploadPictureFiles(wifiInfo_t * wifiInfo, uploadInfo_t *uploadInfo, F
   if (canUploadPictures(uploadInfo->bunchSize, filesCounters)) {
     result = initWifi(wifiInfo);
     if (result == ok) {
-      for (uint16_t i = filesCounters->uploadedPictureNumber + 1; i <= filesCounters->pictureNumber; i++) {
+      for (uint16_t i = filesCounters->uploadedPictureCounter + 1; i <= filesCounters->pictureCounter; i++) {
         result = uploadPictureFile(uploadInfo, i);
         if (result == ok) {
-          filesCounters->uploadedPictureNumber++;
+          filesCounters->uploadedPictureCounter++;
         } else {
           break;
         }

@@ -16,6 +16,7 @@ typedef struct {
   bool uploadPicture;
   uint16_t cameraGetReadyDurationMs;
   uint16_t awakeDurationMs;
+  uint16_t awakePeriodSec;
   wifiInfo_t wifiInfo;
   uploadInfo_t uploadInfo;
 } appConfig_t;
