@@ -35,7 +35,18 @@
 // duty cycle bit range
 #define PWM_RESOLUTION 9
 
-statusCode initCamera(uint16_t cameraGetReadyDurationMs);
+typedef struct {
+  void * setterOffset;
+  int value;
+} sensorSetting_t;
+
+typedef struct {
+  uint16_t getReadyDurationMs;
+  int sensorSettingCount;
+  sensorSetting_t sensorSettings[32];
+} cameraSetting_t;
+
+statusCode initCamera(cameraSetting_t * cameraSetting);
 void enableLamp();
 void disableLamp();
 void setLamp(int newVal);

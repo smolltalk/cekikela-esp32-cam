@@ -40,6 +40,7 @@ void zzzzZZZZ() {
   
   // Wake up in TIME_TO_SLEEP seconds
   if (appConfig.awakePeriodSec) {
+    Serial.printf("I'll wake up in %d second(s).\n")
     esp_sleep_enable_timer_wakeup(appConfig.awakePeriodSec * uS_TO_S_FACTOR);
   }
 
@@ -58,7 +59,7 @@ statusCode runActions() {
   uploadInfo_t * uploadInfo = &(appConfig.uploadInfo);
   
   // Init camera
-  if ((result = initCamera(appConfig.cameraGetReadyDurationMs)) != ok) {
+  if ((result = initCamera(&(appConfig.cameraSetting))) != ok) {
     return result;
   }
 

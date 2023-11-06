@@ -1,6 +1,6 @@
 #include "camera.h"
 
-statusCode initCamera(uint16_t cameraGetReadyDurationMs) {
+statusCode initCamera(cameraSetting_t *cameraSetting) {
   // Disable brownout detector
   // https://iotespresso.com/how-to-disable-brownout-detector-in-esp32-in-arduino/
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
@@ -45,14 +45,23 @@ statusCode initCamera(uint16_t cameraGetReadyDurationMs) {
   sensor_t *s = esp_camera_sensor_get();
   // Adjustments from https://forum.arduino.cc/t/about-esp32cam-image-too-dark-how-to-fix/1015490/5
 
+  // Default camera sensor settings
   s->set_gain_ctrl(s, 1);      // auto gain on
   s->set_exposure_ctrl(s, 1);  // auto exposure on
   s->set_awb_gain(s, 1);       // Auto White Balance enable (0 or 1)
   s->set_brightness(s, 1);
+  s->set_gainceiling(s, (gainceiling_t)1);
+
+  // Apply camera sensor settings from appConfig
+  for (int i = 0; i < cameraSetting->sensorSettingCount; i++) {
+    sensorSetting_t *sensorSetting = &(cameraSetting->sensorSettings[i]);
+    int (**setter)(sensor_t *, int) = (int (**)(sensor_t *, int))((uint32_t)s + (uint32_t)sensorSetting->setterOffset);
+    (*setter)(s, sensorSetting->value);
+  }
 
   // Wait until camera is ready: avoid green dark pictures.
   // Less than 1s does not work.
-  delay(cameraGetReadyDurationMs);
+  delay(cameraSetting->getReadyDurationMs);
   return ok;
 }
 

@@ -6,29 +6,20 @@
 RTC_DATA_ATTR appConfig_t appConfig = {
   .readConfigOnSdCard = true,
   .configOnSdCardRead = false,
-  .savePictureOnSdCard = true,
-  .uploadPicture = true,
-  .cameraGetReadyDurationMs = 1500,
-  .awakeDurationMs = 5000,
-  .awakePeriodSec = 0,
-  .wifiInfo = {
-    {.ssid = "Freebox-778319"},
-    {.password = "xxt6wq59kfqk63hdqxxzkm"},
-    .connectAttemptMax = 30
-  },
-  .uploadInfo = {
-    {.serverName = "37.27.8.236"},
-    .serverPort = 80,
-    {.uploadPath = "/upload.php"},
-    {.auth = "bigblackbird"},
-    .bunchSize = 2,
-    .fileNameRandSize = 5
+  .cameraSetting = {
+    .sensorSettingCount = 0
   }
 };
 
 // TODO
+// - No wifi param -> No NTP
+// - Log
 // - Write Readme.md
 // - OTA
-// - Add camera parameters to config
+// - gainceiling, framesize, etc settings
+// - use begin instead of initXYZ
+// - simplify getting member address with offsetof
+// - Rename file in C or use extern C { } as in sensor.h
+// - SDConfig with section
 
 #endif

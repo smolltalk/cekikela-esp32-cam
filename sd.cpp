@@ -13,7 +13,7 @@ statusCode initSDCard() {
     Serial.println("SD Card Mount Failed.");
     return sdInitError;
   }
-  
+
   cardType = SD_MMC.cardType();
 
   if (cardType == CARD_NONE) {
@@ -52,27 +52,27 @@ statusCode readFilesCounters(FilesCounters *filesCounters) {
 
   // Init SD Card
   result = initSDCard();
-  if (result != ok){
+  if (result != ok) {
     return result;
   }
   fs::FS &fs = SD_MMC;
   Serial.printf("File %s %s.\n", FILES_COUNTERS_FILE_NAME, fs.exists(FILES_COUNTERS_FILE_NAME) ? "exists" : "does not exist");
 
   SDConfig sdConfig;
-  
+
   //Initialize SDConfig object
-  if(sdConfig.begin(FILES_COUNTERS_FILE_NAME, 100)) { 
+  if (sdConfig.begin(fs, FILES_COUNTERS_FILE_NAME, 100)) {
     bool pictureCounterRead = false;
     bool uploadedPictureCounterRead = false;
-    
+
     while (sdConfig.readNextSetting()) {
-      if(sdConfig.nameIs("pictureCounter")){
-          filesCounters->pictureCounter = sdConfig.getIntValue();
-          pictureCounterRead = true;
-      }else if(sdConfig.nameIs("uploadedpictureCounter")){
-          filesCounters->uploadedPictureCounter = sdConfig.getIntValue();
-          uploadedPictureCounterRead = true;
-      }else{
+      if (sdConfig.nameIs("pictureCounter")) {
+        filesCounters->pictureCounter = sdConfig.getIntValue();
+        pictureCounterRead = true;
+      } else if (sdConfig.nameIs("uploadedPictureCounter")) {
+        filesCounters->uploadedPictureCounter = sdConfig.getIntValue();
+        uploadedPictureCounterRead = true;
+      } else {
         result = readConfigError;
         Serial.printf("Unknown counter %s.\n", sdConfig.getName());
       }
@@ -85,11 +85,11 @@ statusCode readFilesCounters(FilesCounters *filesCounters) {
       } else if (!uploadedPictureCounterRead) {
         result = readConfigError;
         Serial.printf("uploadedPictureCounter is missing.\n");
-      } 
+      }
     }
     return result;
   }
-  
+
   // Else
   Serial.printf("Failed to open file %s in reading mode.\n", FILES_COUNTERS_FILE_NAME);
   return sdReadError;
@@ -100,10 +100,10 @@ statusCode writeFilesCounters(FilesCounters *filesCounters) {
 
   // Init SD Card
   statusCode result = initSDCard();
-  if (result != ok){
+  if (result != ok) {
     return result;
   }
-  
+
   fs::FS &fs = SD_MMC;
   File file = fs.open(FILES_COUNTERS_FILE_NAME, FILE_WRITE);
   if (file) {
@@ -111,7 +111,7 @@ statusCode writeFilesCounters(FilesCounters *filesCounters) {
     Serial.printf("File %s open in writing mode.\n", FILES_COUNTERS_FILE_NAME);
     result = (file.write((uint8_t *)buffer, sprintf(buffer, "pictureCounter=%d\nuploadedPictureCounter=%d\n", filesCounters->pictureCounter, filesCounters->uploadedPictureCounter)) > 0) ? ok : sdWriteError;
     file.close();
-    Serial.printf("Written metadata: %s\n", buffer);
+    Serial.printf("Written metadata:\n%s\n", buffer);
     return result;
   }
   // Else

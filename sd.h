@@ -4,7 +4,7 @@
 #include "error.h"
 #include "FS.h"
 #include "SD_MMC.h"
-#include <SDConfig.h>
+#include "SDConfig.h"
 
 #define FILES_COUNTERS_FILE_NAME "/counters.txt"
 

@@ -6,6 +6,9 @@
 #include "time.h"
 #include "wifimgt.h"
 
+// Update time period = 24h
+#define UPDATE_TIME_PERIOD_SEC 86400
+
 void updateTime(wifiInfo_t * wifiInfo);
 
 #endif

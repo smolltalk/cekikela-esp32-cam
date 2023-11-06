@@ -9,7 +9,7 @@ void updateTime(wifiInfo_t * wifiInfo) {
   static RTC_DATA_ATTR time_t lastUpdateTime;
 
   if (getLocalTime(&timeInfo)) {
-    if (difftime(mktime(&timeInfo), lastUpdateTime) > 30) {
+    if (difftime(mktime(&timeInfo), lastUpdateTime) > UPDATE_TIME_PERIOD_SEC) {
       updateTimeFromNtp = true;
       Serial.println("It's time to update time.");
     }
