@@ -13,7 +13,7 @@ enum statusCode {
   sdInitError = 3,
   sdReadError = 4,
   sdWriteError = 5,
-  uploadWifiInitError = 6,
+  wifiInitError = 6,
   uploadPictureError = 7,
   readConfigError = 8
 };

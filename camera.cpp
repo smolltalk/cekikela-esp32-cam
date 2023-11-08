@@ -1,6 +1,6 @@
 #include "camera.h"
 
-statusCode initCamera(cameraSetting_t *cameraSetting) {
+statusCode initCamera(cameraSettings_t *cameraSettings) {
   // Disable brownout detector
   // https://iotespresso.com/how-to-disable-brownout-detector-in-esp32-in-arduino/
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
@@ -53,15 +53,20 @@ statusCode initCamera(cameraSetting_t *cameraSetting) {
   s->set_gainceiling(s, (gainceiling_t)1);
 
   // Apply camera sensor settings from appConfig
-  for (int i = 0; i < cameraSetting->sensorSettingCount; i++) {
-    sensorSetting_t *sensorSetting = &(cameraSetting->sensorSettings[i]);
-    int (**setter)(sensor_t *, int) = (int (**)(sensor_t *, int))((uint32_t)s + (uint32_t)sensorSetting->setterOffset);
+  uint8_t sensorSettingsCount = sizeof(cameraSettings->sensorSettings) / sizeof(sensorSetting_t);
+  for (int i = 0; i < sensorSettingsCount; i++) {
+    sensorSetting_t * sensorSetting = &(cameraSettings->sensorSettingsArray[i]);
+    if (!sensorSetting->enabled) {
+      continue;
+    }
+    // Apply enabled sensor setting 
+    int (**setter)(sensor_t *, int) = (int (**)(sensor_t *, int))((unsigned int)s + sensorSetting->setterOffset);
     (*setter)(s, sensorSetting->value);
   }
 
   // Wait until camera is ready: avoid green dark pictures.
   // Less than 1s does not work.
-  delay(cameraSetting->getReadyDurationMs);
+  delay(cameraSettings->getReadyDurationMs);
   return ok;
 }
 

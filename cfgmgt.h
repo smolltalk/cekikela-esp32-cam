@@ -15,23 +15,22 @@
 #define CONFIG_VALUE_MAX_SIZE 100
 
 typedef struct {
+  bool setupConfigDone;
   bool readConfigOnSdCard;
   bool configOnSdCardRead;
   bool savePictureOnSdCard;
-  bool uploadPicture;
   uint16_t awakeDurationMs;
   uint16_t awakePeriodSec;
-  wifiInfo_t wifiInfo;
-  uploadInfo_t uploadInfo;
-  cameraSetting_t cameraSetting;
+  wifiSettings_t wifiSettings;
+  uploadSettings_t uploadSettings;
+  cameraSettings_t cameraSettings;
 } appConfig_t;
 
 typedef struct {
   bool alreadySet;
   const char * paramName;
   void * paramAddress;
-  void * paramAddress2;
-  void (*setter) (SDConfig *config, void * paramAddress, void *paramAddress2);
+  void (*setter) (SDConfig *config, void * paramAddress);
 } paramSetter_t;
 
 statusCode readConfigOnSDCard(appConfig_t * appConfig);

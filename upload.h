@@ -14,26 +14,27 @@
 #define AUTH_PATH_MAX_SIZE 32
 
 typedef struct {
+  bool enabled = false;
   char serverName[SERVER_NAME_MAX_SIZE + 1];
   int serverPort;
   char uploadPath[UPLOAD_PATH_MAX_SIZE + 1];
   char auth[AUTH_PATH_MAX_SIZE + 1];
   uint8_t bunchSize;
   uint8_t fileNameRandSize;
-} uploadInfo_t;
+} uploadSettings_t;
 
-statusCode uploadPictureFile(uploadInfo_t * uploadInfo, uint16_t i);
+statusCode uploadPictureFile(uploadSettings_t * uploadSettings, uint16_t i);
 bool canUploadPictures(uint8_t bunchSize, FilesCounters * filesCounters);
-statusCode uploadPictureFiles(wifiInfo_t * wifiInfo, uploadInfo_t * uploadInfo, FilesCounters * filesCounters);
-statusCode uploadPicture(wifiInfo_t * wifiInfo, uploadInfo_t * uploadInfo, char * pictureName, uint8_t * buf, size_t len);
+statusCode uploadPictureFiles(wifiSettings_t * wifiSettings, uploadSettings_t * uploadSettings, FilesCounters * filesCounters);
+statusCode uploadPicture(wifiSettings_t * wifiSettings, uploadSettings_t * uploadSettings, char * pictureName, uint8_t * buf, size_t len);
 
 class DataUploader {
 public:
-  DataUploader(uploadInfo_t * uploadInfo, uint32_t dataLen, String fileName);
+  DataUploader(uploadSettings_t * uploadSettings, uint32_t dataLen, String fileName);
   statusCode upload();
 
 protected:
-  uploadInfo_t * uploadInfo;
+  uploadSettings_t * uploadSettings;
   uint32_t dataLen;
   String fileName;
   WiFiClient client;
@@ -45,7 +46,7 @@ private:
 class BufferDataUploader : public DataUploader {
 
 public:
-  BufferDataUploader(uploadInfo_t * uploadInfo, uint8_t * buf, size_t len, String fileName);
+  BufferDataUploader(uploadSettings_t * uploadSettings, uint8_t * buf, size_t len, String fileName);
 
 private:
   uint8_t * buf;
@@ -56,7 +57,7 @@ private:
 
 class FileDataUploader : public DataUploader {
 public:
-  FileDataUploader(uploadInfo_t * uploadInfo, File file);
+  FileDataUploader(uploadSettings_t * uploadSettings, File file);
 
 private:
   File file;

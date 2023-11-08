@@ -9,6 +9,6 @@
 // Update time period = 24h
 #define UPDATE_TIME_PERIOD_SEC 86400
 
-void updateTime(wifiInfo_t * wifiInfo);
+void updateTime(wifiSettings_t * wifiSettings);
 
 #endif

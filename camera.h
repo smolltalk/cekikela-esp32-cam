@@ -36,17 +36,47 @@
 #define PWM_RESOLUTION 9
 
 typedef struct {
-  void * setterOffset;
+  bool enabled;
   int value;
+  unsigned int setterOffset;
 } sensorSetting_t;
 
 typedef struct {
-  uint16_t getReadyDurationMs;
-  int sensorSettingCount;
-  sensorSetting_t sensorSettings[32];
-} cameraSetting_t;
+  sensorSetting_t contrast = { false, 0, offsetof(sensor_t, set_contrast) };
+  sensorSetting_t brightness = { false, 0, offsetof(sensor_t, set_brightness) };
+  sensorSetting_t saturation = { false, 0, offsetof(sensor_t, set_saturation) };
+  sensorSetting_t sharpness = { false, 0, offsetof(sensor_t, set_sharpness) };
+  sensorSetting_t denoise = { false, 0, offsetof(sensor_t, set_denoise) };
+  sensorSetting_t quality = { false, 0, offsetof(sensor_t, set_quality) };
+  sensorSetting_t colorbar = { false, 0, offsetof(sensor_t, set_colorbar) };
+  sensorSetting_t whitebal = { false, 0, offsetof(sensor_t, set_whitebal) };
+  sensorSetting_t gain_ctrl = { false, 0, offsetof(sensor_t, set_gain_ctrl) };
+  sensorSetting_t exposure_ctrl = { false, 0, offsetof(sensor_t, set_exposure_ctrl) };
+  sensorSetting_t hmirror = { false, 0, offsetof(sensor_t, set_hmirror) };
+  sensorSetting_t vflip = { false, 0, offsetof(sensor_t, set_vflip) };
+  sensorSetting_t aec2 = { false, 0, offsetof(sensor_t, set_aec2) };
+  sensorSetting_t awb_gain = { false, 0, offsetof(sensor_t, set_awb_gain) };
+  sensorSetting_t agc_gain = { false, 0, offsetof(sensor_t, set_agc_gain) };
+  sensorSetting_t aec_value = { false, 0, offsetof(sensor_t, set_aec_value) };
+  sensorSetting_t special_effect = { false, 0, offsetof(sensor_t, set_special_effect) };
+  sensorSetting_t wb_mode = { false, 0, offsetof(sensor_t, set_wb_mode) };
+  sensorSetting_t ae_level = { false, 0, offsetof(sensor_t, set_ae_level) };
+  sensorSetting_t dcw = { false, 0, offsetof(sensor_t, set_dcw) };
+  sensorSetting_t bpc = { false, 0, offsetof(sensor_t, set_bpc) };
+  sensorSetting_t wpc = { false, 0, offsetof(sensor_t, set_wpc) };
+  sensorSetting_t raw_gma = { false, 0, offsetof(sensor_t, set_raw_gma) };
+  sensorSetting_t lenc = { false, 0, offsetof(sensor_t, set_lenc) };
+} sensorSettings_t;
 
-statusCode initCamera(cameraSetting_t * cameraSetting);
+typedef struct {
+  uint16_t getReadyDurationMs;
+  union {
+    sensorSettings_t sensorSettings;
+    sensorSetting_t sensorSettingsArray[24];
+  };
+} cameraSettings_t;
+
+statusCode initCamera(cameraSettings_t *cameraSettings);
 void enableLamp();
 void disableLamp();
 void setLamp(int newVal);
