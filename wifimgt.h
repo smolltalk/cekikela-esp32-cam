@@ -15,7 +15,7 @@ typedef struct {
   uint8_t connectAttemptMax;
 } wifiSettings_t;
 
-statusCode initWifi(wifiSettings_t * wifiSettings);
+statusCode initWifi(wifiSettings_t * wifi);
 void endWifi();
 
 #endif

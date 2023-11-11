@@ -66,17 +66,20 @@ typedef struct {
   sensorSetting_t wpc = { false, 0, offsetof(sensor_t, set_wpc) };
   sensorSetting_t raw_gma = { false, 0, offsetof(sensor_t, set_raw_gma) };
   sensorSetting_t lenc = { false, 0, offsetof(sensor_t, set_lenc) };
+  sensorSetting_t gainceiling = { false, 0, offsetof(sensor_t, set_gainceiling) };
+  sensorSetting_t framesize = { false, 0, offsetof(sensor_t, set_framesize) };
+  sensorSetting_t pixformat = { false, 0, offsetof(sensor_t, set_pixformat) };
 } sensorSettings_t;
 
 typedef struct {
-  uint16_t getReadyDurationMs;
+  uint16_t getReadyDelayMs;
   union {
-    sensorSettings_t sensorSettings;
-    sensorSetting_t sensorSettingsArray[24];
+    sensorSettings_t sensor;
+    sensorSetting_t sensorSettingsArray[25];
   };
 } cameraSettings_t;
 
-statusCode initCamera(cameraSettings_t *cameraSettings);
+statusCode initCamera(cameraSettings_t *camera);
 void enableLamp();
 void disableLamp();
 void setLamp(int newVal);

@@ -1,10 +1,10 @@
 #include "wifimgt.h"
 
-statusCode initWifi(wifiSettings_t * wifiSettings) {
+statusCode initWifi(wifiSettings_t * wifi) {
   statusCode result = ok;
 
   // Disabled?
-  if (!wifiSettings->enabled){
+  if (!wifi->enabled){
     result = wifiInitError;
     Serial.printf("Wifi is disabled. Return with code: %d\n", result);
     return result;
@@ -20,12 +20,12 @@ statusCode initWifi(wifiSettings_t * wifiSettings) {
   }
   // Try to connect
   Serial.print("Connecting to ");
-  Serial.println(wifiSettings->ssid);
+  Serial.println(wifi->ssid);
 
-  WiFi.begin(wifiSettings->ssid, wifiSettings->password);
+  WiFi.begin(wifi->ssid, wifi->password);
 
   int connectAttemptCount = 0;
-  while (WiFi.status() != WL_CONNECTED && connectAttemptCount < wifiSettings->connectAttemptMax) {
+  while (WiFi.status() != WL_CONNECTED && connectAttemptCount < wifi->connectAttemptMax) {
     delay(500);
     Serial.print(".");
     connectAttemptCount++;

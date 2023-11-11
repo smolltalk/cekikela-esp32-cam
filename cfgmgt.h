@@ -21,9 +21,9 @@ typedef struct {
   bool savePictureOnSdCard;
   uint16_t awakeDurationMs;
   uint16_t awakePeriodSec;
-  wifiSettings_t wifiSettings;
-  uploadSettings_t uploadSettings;
-  cameraSettings_t cameraSettings;
+  wifiSettings_t wifi;
+  uploadSettings_t upload;
+  cameraSettings_t camera;
 } appConfig_t;
 
 typedef struct {

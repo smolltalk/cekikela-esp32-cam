@@ -27,7 +27,10 @@
 #include "cfgmgt.h"
 #include "app.h"
 
-RTC_DATA_ATTR appConfig_t appConfig = {.setupConfigDone = false};
+// Initialize default config:
+// - Try to read the config on SD card
+// - save picture on SD Card
+RTC_DATA_ATTR appConfig_t appConfig = { .setupConfigDone = false, .readConfigOnSdCard = true, .savePictureOnSdCard = true };
 
 void setup() {
   statusCode result;
@@ -55,8 +58,8 @@ statusCode runActions() {
   camera_fb_t *fb = NULL;
   char pictureName[20];
   FilesCounters filesCounters;
-  wifiSettings_t * wifiSettings = &(appConfig.wifiSettings);
-  uploadSettings_t * uploadSettings = &(appConfig.uploadSettings);
+  wifiSettings_t *wifi = &(appConfig.wifi);
+  uploadSettings_t *uploadSettings = &(appConfig.upload);
 
   // Setup app config once
   if (!appConfig.setupConfigDone) {
@@ -68,7 +71,7 @@ statusCode runActions() {
   }
 
   // Init camera
-  if ((result = initCamera(&(appConfig.cameraSettings))) != ok) {
+  if ((result = initCamera(&(appConfig.camera))) != ok) {
     return result;
   }
 
@@ -78,7 +81,7 @@ statusCode runActions() {
   }
 
   // Sync time with NTP
-  updateTime(wifiSettings);
+  updateTime(wifi);
 
   if (appConfig.savePictureOnSdCard) {
     // Writing on SD card involves flash lighting
@@ -92,19 +95,19 @@ statusCode runActions() {
       }
     }
   }
-  if (appConfig.uploadSettings.enabled) {
+  if (appConfig.upload.enabled) {
     if (!pictureSavedOnSd) {
       statusCode uploadResult;
       // Failed to saved on SD card, then try to upload.
       computePictureNameFromRandom(pictureName, uploadSettings->fileNameRandSize);
-      uploadResult = uploadPicture(wifiSettings, uploadSettings, pictureName, fb->buf, fb->len);
+      uploadResult = uploadPicture(wifi, uploadSettings, pictureName, fb->buf, fb->len);
       // Don't override result when result already contains an error code.
       if (result == ok) {
         result = uploadResult;
       }
     } else {
       // Upload a bunch of files.
-      result = uploadPictureFiles(wifiSettings, uploadSettings, &filesCounters);
+      result = uploadPictureFiles(wifi, uploadSettings, &filesCounters);
     }
   }
   endWifi();
@@ -122,7 +125,7 @@ void zzzzZZZZ() {
 
   // Wake up on PIR, ie on up edge on pin 12
   esp_sleep_enable_ext0_wakeup(GPIO_NUM_12, 1);
-  
+
   // Wake up in TIME_TO_SLEEP seconds
   if (appConfig.awakePeriodSec) {
     Serial.printf("I'll wake up in %d second(s).\n");

@@ -17,7 +17,7 @@ typedef struct {
   bool enabled = false;
   char serverName[SERVER_NAME_MAX_SIZE + 1];
   int serverPort;
-  char uploadPath[UPLOAD_PATH_MAX_SIZE + 1];
+  char path[UPLOAD_PATH_MAX_SIZE + 1];
   char auth[AUTH_PATH_MAX_SIZE + 1];
   uint8_t bunchSize;
   uint8_t fileNameRandSize;
@@ -25,8 +25,8 @@ typedef struct {
 
 statusCode uploadPictureFile(uploadSettings_t * uploadSettings, uint16_t i);
 bool canUploadPictures(uint8_t bunchSize, FilesCounters * filesCounters);
-statusCode uploadPictureFiles(wifiSettings_t * wifiSettings, uploadSettings_t * uploadSettings, FilesCounters * filesCounters);
-statusCode uploadPicture(wifiSettings_t * wifiSettings, uploadSettings_t * uploadSettings, char * pictureName, uint8_t * buf, size_t len);
+statusCode uploadPictureFiles(wifiSettings_t * wifi, uploadSettings_t * uploadSettings, FilesCounters * filesCounters);
+statusCode uploadPicture(wifiSettings_t * wifi, uploadSettings_t * uploadSettings, char * pictureName, uint8_t * buf, size_t len);
 
 class DataUploader {
 public:

@@ -19,7 +19,7 @@ statusCode DataUploader::upload() {
     uint32_t totalLen = dataLen + extraLen;
  
     client.print("POST ");
-    client.print(uploadSettings->uploadPath);
+    client.print(uploadSettings->path);
     client.println(" HTTP/1.1");
     client.print("Host: "); 
     client.println(uploadSettings->serverName);
@@ -127,10 +127,10 @@ bool canUploadPictures(uint8_t bunchSize, FilesCounters *filesCounters) {
   return (filesCounters->pictureCounter - filesCounters->uploadedPictureCounter >= bunchSize);
 }
 
-statusCode uploadPictureFiles(wifiSettings_t * wifiSettings, uploadSettings_t *uploadSettings, FilesCounters *filesCounters) {
+statusCode uploadPictureFiles(wifiSettings_t * wifi, uploadSettings_t *uploadSettings, FilesCounters *filesCounters) {
   statusCode result = ok;
   if (canUploadPictures(uploadSettings->bunchSize, filesCounters)) {
-    result = initWifi(wifiSettings);
+    result = initWifi(wifi);
     if (result == ok) {
       for (uint16_t i = filesCounters->uploadedPictureCounter + 1; i <= filesCounters->pictureCounter; i++) {
         result = uploadPictureFile(uploadSettings, i);
@@ -146,9 +146,9 @@ statusCode uploadPictureFiles(wifiSettings_t * wifiSettings, uploadSettings_t *u
   return result;
 }
 
-statusCode uploadPicture(wifiSettings_t * wifiSettings, uploadSettings_t *uploadSettings, char *pictureName, uint8_t *buf, size_t len) {
+statusCode uploadPicture(wifiSettings_t * wifi, uploadSettings_t *uploadSettings, char *pictureName, uint8_t *buf, size_t len) {
   statusCode result = ok;
-  result = initWifi(wifiSettings);
+  result = initWifi(wifi);
   if (result == ok) {
     BufferDataUploader bdu(uploadSettings, buf, len, String(pictureName));
     result = bdu.upload();

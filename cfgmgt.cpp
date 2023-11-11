@@ -20,11 +20,11 @@ void copyCharStr(SDConfig *sdConfig, void *paramAddress) {
 }
 
 void setUint8(SDConfig *sdConfig, void *paramAddress) {
-  *((uint8_t *)paramAddress) = (uint8_t) sdConfig->getIntValue();
+  *((uint8_t *)paramAddress) = (uint8_t)sdConfig->getIntValue();
 }
 
 void setUint16(SDConfig *sdConfig, void *paramAddress) {
-  *((uint16_t *)paramAddress) = (uint16_t) sdConfig->getIntValue();
+  *((uint16_t *)paramAddress) = (uint16_t)sdConfig->getIntValue();
 }
 
 void setInt(SDConfig *sdConfig, void *paramAddress) {
@@ -35,9 +35,9 @@ void setBool(SDConfig *sdConfig, void *paramAddress) {
   *((bool *)paramAddress) = sdConfig->getBooleanValue();
 }
 
-void setCameraSensorSetting(SDConfig *sdConfig, void *sensorSettingddress) {
-  sensorSetting_t *sensorSetting = (sensorSetting_t *) sensorSettingddress;
-  sensorSetting->enabled= true;
+void setCameraSensorSetting(SDConfig *sdConfig, void *sensorSettingAddress) {
+  sensorSetting_t *sensorSetting = (sensorSetting_t *)sensorSettingAddress;
+  sensorSetting->enabled = true;
   sensorSetting->value = sdConfig->getIntValue();
 }
 
@@ -70,42 +70,45 @@ statusCode readConfigOnSDCard(appConfig_t *appConfig) {
     { false, "savePictureOnSdCard", &(appConfig->savePictureOnSdCard), setBool },
     { false, "awakeDurationMs", &(appConfig->awakeDurationMs), setUint16 },
     { false, "awakePeriodSec", &(appConfig->awakePeriodSec), setUint16 },
-    { false, "wifi.enabled", &(appConfig->wifiSettings.enabled), setBool },
-    { false, "wifi.ssid", appConfig->wifiSettings.ssid, copyCharStr },
-    { false, "wifi.password", appConfig->wifiSettings.password, copyCharStr },
-    { false, "wifi.connectAttemptMax", &(appConfig->wifiSettings.connectAttemptMax), setUint8 },
-    { false, "upload.enabled", &(appConfig->uploadSettings.enabled), setBool },
-    { false, "upload.serverName", appConfig->uploadSettings.serverName, copyCharStr },
-    { false, "upload.serverPort", &(appConfig->uploadSettings.serverPort), setInt },
-    { false, "upload.uploadPath", appConfig->uploadSettings.uploadPath, copyCharStr },
-    { false, "upload.auth", appConfig->uploadSettings.auth, copyCharStr },
-    { false, "upload.bunchSize", &(appConfig->uploadSettings.bunchSize), setUint8 },
-    { false, "upload.fileNameRandSize", &(appConfig->uploadSettings.fileNameRandSize), setUint8 },
-    { false, "camera.getReadyDurationMs", &(appConfig->cameraSettings.getReadyDurationMs), setUint16 },
-    { false, "camera.contrast", &(appConfig->cameraSettings.sensorSettings.contrast), setCameraSensorSetting },
-    { false, "camera.brightness", &(appConfig->cameraSettings.sensorSettings.brightness), setCameraSensorSetting },
-    { false, "camera.saturation", &(appConfig->cameraSettings.sensorSettings.saturation), setCameraSensorSetting },
-    { false, "camera.sharpness", &(appConfig->cameraSettings.sensorSettings.sharpness), setCameraSensorSetting },
-    { false, "camera.denoise", &(appConfig->cameraSettings.sensorSettings.denoise), setCameraSensorSetting },
-    { false, "camera.quality", &(appConfig->cameraSettings.sensorSettings.quality), setCameraSensorSetting },
-    { false, "camera.colorbar", &(appConfig->cameraSettings.sensorSettings.colorbar), setCameraSensorSetting },
-    { false, "camera.whitebal", &(appConfig->cameraSettings.sensorSettings.whitebal), setCameraSensorSetting },
-    { false, "camera.gain_ctrl", &(appConfig->cameraSettings.sensorSettings.gain_ctrl), setCameraSensorSetting },
-    { false, "camera.exposure_ctrl", &(appConfig->cameraSettings.sensorSettings.exposure_ctrl), setCameraSensorSetting },
-    { false, "camera.hmirror", &(appConfig->cameraSettings.sensorSettings.hmirror), setCameraSensorSetting },
-    { false, "camera.vflip", &(appConfig->cameraSettings.sensorSettings.vflip), setCameraSensorSetting },
-    { false, "camera.aec2", &(appConfig->cameraSettings.sensorSettings.aec2), setCameraSensorSetting },
-    { false, "camera.awb_gain", &(appConfig->cameraSettings.sensorSettings.awb_gain), setCameraSensorSetting },
-    { false, "camera.agc_gain", &(appConfig->cameraSettings.sensorSettings.agc_gain), setCameraSensorSetting },
-    { false, "camera.aec_value", &(appConfig->cameraSettings.sensorSettings.aec_value), setCameraSensorSetting },
-    { false, "camera.special_effect", &(appConfig->cameraSettings.sensorSettings.special_effect), setCameraSensorSetting },
-    { false, "camera.wb_mode", &(appConfig->cameraSettings.sensorSettings.wb_mode), setCameraSensorSetting },
-    { false, "camera.ae_level", &(appConfig->cameraSettings.sensorSettings.ae_level), setCameraSensorSetting },
-    { false, "camera.dcw", &(appConfig->cameraSettings.sensorSettings.dcw), setCameraSensorSetting },
-    { false, "camera.bpc", &(appConfig->cameraSettings.sensorSettings.bpc), setCameraSensorSetting },
-    { false, "camera.wpc", &(appConfig->cameraSettings.sensorSettings.wpc), setCameraSensorSetting },
-    { false, "camera.raw_gma", &(appConfig->cameraSettings.sensorSettings.raw_gma), setCameraSensorSetting },
-    { false, "camera.lenc", &(appConfig->cameraSettings.sensorSettings.lenc), setCameraSensorSetting }
+    { false, "wifi.enabled", &(appConfig->wifi.enabled), setBool },
+    { false, "wifi.ssid", appConfig->wifi.ssid, copyCharStr },
+    { false, "wifi.password", appConfig->wifi.password, copyCharStr },
+    { false, "wifi.connectAttemptMax", &(appConfig->wifi.connectAttemptMax), setUint8 },
+    { false, "upload.enabled", &(appConfig->upload.enabled), setBool },
+    { false, "upload.serverName", appConfig->upload.serverName, copyCharStr },
+    { false, "upload.serverPort", &(appConfig->upload.serverPort), setInt },
+    { false, "upload.path", appConfig->upload.path, copyCharStr },
+    { false, "upload.auth", appConfig->upload.auth, copyCharStr },
+    { false, "upload.bunchSize", &(appConfig->upload.bunchSize), setUint8 },
+    { false, "upload.fileNameRandSize", &(appConfig->upload.fileNameRandSize), setUint8 },
+    { false, "camera.getReadyDelayMs", &(appConfig->camera.getReadyDelayMs), setUint16 },
+    { false, "sensor.contrast", &(appConfig->camera.sensor.contrast), setCameraSensorSetting },
+    { false, "sensor.brightness", &(appConfig->camera.sensor.brightness), setCameraSensorSetting },
+    { false, "sensor.saturation", &(appConfig->camera.sensor.saturation), setCameraSensorSetting },
+    { false, "sensor.sharpness", &(appConfig->camera.sensor.sharpness), setCameraSensorSetting },
+    { false, "sensor.gainceiling", &(appConfig->camera.sensor.gainceiling), setCameraSensorSetting },
+    { false, "sensor.framesize", &(appConfig->camera.sensor.framesize), setCameraSensorSetting },
+    { false, "sensor.pixformat", &(appConfig->camera.sensor.pixformat), setCameraSensorSetting },
+    { false, "sensor.denoise", &(appConfig->camera.sensor.denoise), setCameraSensorSetting },
+    { false, "sensor.quality", &(appConfig->camera.sensor.quality), setCameraSensorSetting },
+    { false, "sensor.colorbar", &(appConfig->camera.sensor.colorbar), setCameraSensorSetting },
+    { false, "sensor.whitebal", &(appConfig->camera.sensor.whitebal), setCameraSensorSetting },
+    { false, "sensor.gain_ctrl", &(appConfig->camera.sensor.gain_ctrl), setCameraSensorSetting },
+    { false, "sensor.exposure_ctrl", &(appConfig->camera.sensor.exposure_ctrl), setCameraSensorSetting },
+    { false, "sensor.hmirror", &(appConfig->camera.sensor.hmirror), setCameraSensorSetting },
+    { false, "sensor.vflip", &(appConfig->camera.sensor.vflip), setCameraSensorSetting },
+    { false, "sensor.aec2", &(appConfig->camera.sensor.aec2), setCameraSensorSetting },
+    { false, "sensor.awb_gain", &(appConfig->camera.sensor.awb_gain), setCameraSensorSetting },
+    { false, "sensor.agc_gain", &(appConfig->camera.sensor.agc_gain), setCameraSensorSetting },
+    { false, "sensor.aec_value", &(appConfig->camera.sensor.aec_value), setCameraSensorSetting },
+    { false, "sensor.special_effect", &(appConfig->camera.sensor.special_effect), setCameraSensorSetting },
+    { false, "sensor.wb_mode", &(appConfig->camera.sensor.wb_mode), setCameraSensorSetting },
+    { false, "sensor.ae_level", &(appConfig->camera.sensor.ae_level), setCameraSensorSetting },
+    { false, "sensor.dcw", &(appConfig->camera.sensor.dcw), setCameraSensorSetting },
+    { false, "sensor.bpc", &(appConfig->camera.sensor.bpc), setCameraSensorSetting },
+    { false, "sensor.wpc", &(appConfig->camera.sensor.wpc), setCameraSensorSetting },
+    { false, "sensor.raw_gma", &(appConfig->camera.sensor.raw_gma), setCameraSensorSetting },
+    { false, "sensor.lenc", &(appConfig->camera.sensor.lenc), setCameraSensorSetting }
   };
 
   fs::FS &fs = SD_MMC;
