@@ -24,33 +24,33 @@
 |uploadSettings_t.bunchSize|Upload|Upload in packs of `bunchSize` when pictures are stored on SD card.|uint8_t|[0, 255]|`appConfig->upload.bunchSize=10;`|upload.bunchSize=10|
 |uploadSettings_t.fileNameRandSize|Upload|When the picture is not stored on the SD card,<br/>a random file name is computed.<br/>Its format is `pic-random.jpg` where `random` is randomly composed of numbers and letters.<br/>`fileNameRandSize` defines the length of the random part.|uint8_t|[1, 8]|`appConfig->upload.fileNameRandSize=5;`|upload.fileNameRandSize=5|
 |cameraSettings_t.getReadyDelayMs|Camera|Time required to let the sensor be ready. A delay of 1500ms prevents 'green' pictures.|uint16_t|[0, 65535]|`appConfig->camera.getReadyDelayMs=1500`|camera.getReadyDelayMs=1500|
-|sensorSettings_t.contrast|Camera Sensor|Set contrast.|int|[-2, 2]|`appConfig->camera.sensor.contrast.enabled=true;`<br/>`appConfig->camera.sensor.contrast.value=0`|sensor.contrast=|
-|sensorSettings_t.brightness|Camera Sensor|Set brightness.|int|[-2, 2]|`appConfig->camera.sensor.brightness.enabled=true;`<br/>`appConfig->camera.sensor.brightness.value=0`|sensor.brightness=|
-|sensorSettings_t.saturation|Camera Sensor|Set saturation.|int|[-2, 2]|`appConfig->camera.sensor.saturation.enabled=true;`<br/>`appConfig->camera.sensor.saturation.value=0`|sensor.saturation=|
-|sensorSettings_t.special_effect|Camera Sensor|Set a special effect: 0 - No Effect, 1 - Negative, 2 - Grayscale, 3 - Red Tint, 4 - Green Tint, 5 - Blue Tint, 6 - Sepia.|int|[0, 6]|`appConfig->camera.sensor.special_effect.enabled=true;`<br/>`appConfig->camera.sensor.special_effect.value=2`|sensor.special_effect=2|
-|sensorSettings_t.gainceiling|Camera Sensor|0 = 2X, 1 = 4X, 2 = 8X, 3 = 16X, 4 = 32X, 5 = 64X, 6 = 128X.|int|[0-6]|`appConfig->camera.sensor.gainceiling.enabled=true;`<br/>`appConfig->camera.sensor.gainceiling.value=0`|sensor.gainceiling=0|
-|sensorSettings_t.framesize|Camera Sensor|0 = 96X96, 1 = QQVGA (160x120), 2 = QCIF (176x144), 3 = HQVGA (240x176), 4 = 240X240 (240x240), 5 = QVGA (320x240), 6 = CIF (400x296), 7 = HVGA (480x320), 8 = VGA (640x480), 9 = SVGA (800x600), 10 = XGA (1024x768), 11 = HD (1280x720), 12 = SXGA (1280x1024), 13 = UXGA (1600x1200), [3MP Sensors] 14 = FHD (1920x1080), 15 = P_HD (720x1280), 16 = P_3MP (864x1536), 17 = QXGA (2048x1536), [5MP Sensors] 18 = QHD (2560x1440), 19 = WQXGA (2560x1600), 20 = P_FHD (1080x1920), 21 = QSXGA (2560x1920)|int|[0-21]|`appConfig->camera.sensor.framesize.enabled=true;`<br/>`appConfig->camera.sensor.framesize.value=11`|sensor.framesize=11|
-|sensorSettings_t.pixformat|Camera Sensor|0 = 2BPP/RGB565, 1 = 2BPP/YUV422, 2 = 1.5BPP/YUV420, 3 = 1BPP/GRAYSCALE, 4 = JPEG/COMPRESSED, 5 = 3BPP/RGB888, 6 = RAW, 7 = 3BP2P/RGB444, 8 = 3BP2P/RGB555|int|[0-8]|`appConfig->camera.sensor.pixformat.enabled=true;`<br/>`appConfig->camera.sensor.pixformat.value=4`|sensor.pixformat=4|
-|sensorSettings_t.whitebal|Camera Sensor|Set white balance: 0 = disable, 1 = enable.|int|[0, 1]|`appConfig->camera.sensor.whitebal.enabled=true;`<br/>`appConfig->camera.sensor.whitebal.value=0`|sensor..whitebal=0|
-|sensorSettings_t.awb_gain|Camera Sensor|Set white balance gain: 0 = disable, 1 = enable.|int|[0, 1]|`appConfig->camera.sensor.awb_gain.enabled=true;`<br/>`appConfig->camera.sensor.awb_gain.value=0`|sensor.awb_gain=0|
-|sensorSettings_t.wb_mode|Camera Sensor|Set white balance mode: 0 to 4 - if awb_gain enabled (0 - Auto, 1 - Sunny, 2 - Cloudy, 3 - Office, 4 - Home).|int|[0, 4]|`appConfig->camera.sensor.wb_mode.enabled=true;`<br/>`appConfig->camera.sensor.wb_mode.value=0`|sensor.wb_mode=|
-|sensorSettings_t.exposure_ctrl|Camera Sensor|Set exposure control: 0 = disable, 1 = enable.|int|[0, 1]|`appConfig->camera.sensor.exposure_ctrl.enabled=true;`<br/>`appConfig->camera.sensor.exposure_ctrl.value=0`|sensor.exposure_ctrl=0|
-|sensorSettings_t.aec2|Camera Sensor||int|[0, 1]|`appConfig->camera.sensor.aec2.enabled=true;`<br/>`appConfig->camera.sensor.aec2.value=0`|sensor.aec2=0|
-|sensorSettings_t.ae_level|Camera Sensor||int|[-2, 2]|`appConfig->camera.sensor.ae_level.enabled=true;`<br/>`appConfig->camera.sensor.ae_level.value=0`|sensor.ae_level=0|
-|sensorSettings_t.aec_value|Camera Sensor||int|[0, 1200]|`appConfig->camera.sensor.aec_value.enabled=true;`<br/>`appConfig->camera.sensor.aec_value.value=0`|sensor.aec_value=0|
-|sensorSettings_t.gain_ctrl|Camera Sensor|0 = disable, 1 = enable.|int|[0, 1]|`appConfig->camera.sensor.gain_ctrl.enabled=true;`<br/>`appConfig->camera.sensor.gain_ctrl.value=0`|sensor.gain_ctrl=0|
-|sensorSettings_t.agc_gain|Camera Sensor||int|[0, 30]|`appConfig->camera.sensor.agc_gain.enabled=true;`<br/>`appConfig->camera.sensor.agc_gain.value=0`|sensor.agc_gain=0|
-|sensorSettings_t.bpc|Camera Sensor|0 = disable, 1 = enable.|int|[0, 1]|`appConfig->camera.sensor.bpc.enabled=true;`<br/>`appConfig->camera.sensor.bpc.value=0`|sensor.bpc=0|
-|sensorSettings_t.wpc|Camera Sensor|0 = disable, 1 = enable.|int|[0, 1]|`appConfig->camera.sensor.wpc.enabled=true;`<br/>`appConfig->camera.sensor.wpc.value=0`|sensor.wpc=0|
-|sensorSettings_t.raw_gma|Camera Sensor|0 = disable, 1 = enable.|int|[0, 1]|`appConfig->camera.sensor.raw_gma.enabled=true;`<br/>`appConfig->camera.sensor.raw_gma.value=0`|sensor.raw_gma=0|
-|sensorSettings_t.lenc|Camera Sensor|Set lens correction: 0 = disable, 1 = enable.|int|[0, 1]|`appConfig->camera.sensor.lenc.enabled=true;`<br/>`appConfig->camera.sensor.lenc.value=0`|sensor.lenc=0|
-|sensorSettings_t.hmirror|Camera Sensor|Horizontal mirrot: 0 = disable, 1 = enable.|int|[0, 1]|`appConfig->camera.sensor.hmirror.enabled=true;`<br/>`appConfig->camera.sensor.hmirror.value=0`|sensor.hmirror=0|
-|sensorSettings_t.vflip|Camera Sensor|Vertical flip: 0 = disable, 1 = enable.|int|[0, 1]|`appConfig->camera.sensor.vflip.enabled=true;`<br/>`appConfig->camera.sensor.vflip.value=0`|sensor.vflip=0|
-|sensorSettings_t.colorbar|Camera Sensor|0 = disable, 1 = enable.|int|[0, 1]|`appConfig->camera.sensor.colorbar.enabled=true;`<br/>`appConfig->camera.sensor.colorbar.value=0`|sensor.colorbar=|
-|sensorSettings_t.dcw|Camera Sensor||int||`appConfig->camera.sensor.dcw.enabled=true;`<br/>`appConfig->camera.sensor.dcw.value=0`|sensor.dcw=|
-|sensorSettings_t.sharpness|Camera Sensor||int||`appConfig->camera.sensor.sharpness.enabled=true;`<br/>`appConfig->camera.sensor.sharpness.value=0`|sensor.sharpness=|
-|sensorSettings_t.denoise|Camera Sensor||int||`appConfig->camera.sensor.denoise.enabled=true;`<br/>`appConfig->camera.sensor.denoise.value=0`|sensor.denoise=0|
-|sensorSettings_t.quality|Camera Sensor||int||`appConfig->camera.sensor.quality.enabled=true;`<br/>`appConfig->camera.sensor.quality.value=0`|sensor.quality=0|
+|sensorSettings_t.contrast|Camera Sensor|Set contrast.|int|[-2, 2]|`setSensorSetting(&(appConfig->camera.sensor.contrast), 0)`|sensor.contrast=|
+|sensorSettings_t.brightness|Camera Sensor|Set brightness.|int|[-2, 2]|`setSensorSetting(&(appConfig->camera.sensor.brightness), 0)`|sensor.brightness=|
+|sensorSettings_t.saturation|Camera Sensor|Set saturation.|int|[-2, 2]|`setSensorSetting(&(appConfig->camera.sensor.saturation), 0)`|sensor.saturation=|
+|sensorSettings_t.special_effect|Camera Sensor|Set a special effect: 0 - No Effect, 1 - Negative, 2 - Grayscale, 3 - Red Tint, 4 - Green Tint, 5 - Blue Tint, 6 - Sepia.|int|[0, 6]|`setSensorSetting(&(appConfig->camera.sensor.special_effect), 2)`|sensor.special_effect=2|
+|sensorSettings_t.gainceiling|Camera Sensor|0 = 2X, 1 = 4X, 2 = 8X, 3 = 16X, 4 = 32X, 5 = 64X, 6 = 128X.|int|[0-6]|`setSensorSetting(&(appConfig->camera.sensor.gainceiling), 0)`|sensor.gainceiling=0|
+|sensorSettings_t.framesize|Camera Sensor|0 = 96X96, 1 = QQVGA (160x120), 2 = QCIF (176x144), 3 = HQVGA (240x176), 4 = 240X240 (240x240), 5 = QVGA (320x240), 6 = CIF (400x296), 7 = HVGA (480x320), 8 = VGA (640x480), 9 = SVGA (800x600), 10 = XGA (1024x768), 11 = HD (1280x720), 12 = SXGA (1280x1024), 13 = UXGA (1600x1200), [3MP Sensors] 14 = FHD (1920x1080), 15 = P_HD (720x1280), 16 = P_3MP (864x1536), 17 = QXGA (2048x1536), [5MP Sensors] 18 = QHD (2560x1440), 19 = WQXGA (2560x1600), 20 = P_FHD (1080x1920), 21 = QSXGA (2560x1920)|int|[0-21]|`setSensorSetting(&(appConfig->camera.sensor.framesize), 11)`|sensor.framesize=11|
+|sensorSettings_t.pixformat|Camera Sensor|0 = 2BPP/RGB565, 1 = 2BPP/YUV422, 2 = 1.5BPP/YUV420, 3 = 1BPP/GRAYSCALE, 4 = JPEG/COMPRESSED, 5 = 3BPP/RGB888, 6 = RAW, 7 = 3BP2P/RGB444, 8 = 3BP2P/RGB555|int|[0-8]|`setSensorSetting(&(appConfig->camera.sensor.pixformat), 4)`|sensor.pixformat=4|
+|sensorSettings_t.whitebal|Camera Sensor|Set white balance: 0 = disable, 1 = enable.|int|[0, 1]|`setSensorSetting(&(appConfig->camera.sensor.whitebal), 0)`|sensor..whitebal=0|
+|sensorSettings_t.awb_gain|Camera Sensor|Set white balance gain: 0 = disable, 1 = enable.|int|[0, 1]|`setSensorSetting(&(appConfig->camera.sensor.awb_gain), 0)`|sensor.awb_gain=0|
+|sensorSettings_t.wb_mode|Camera Sensor|Set white balance mode: 0 to 4 - if awb_gain enabled (0 - Auto, 1 - Sunny, 2 - Cloudy, 3 - Office, 4 - Home).|int|[0, 4]|`setSensorSetting(&(appConfig->camera.sensor.wb_mode), 0)`|sensor.wb_mode=|
+|sensorSettings_t.exposure_ctrl|Camera Sensor|Set exposure control: 0 = disable, 1 = enable.|int|[0, 1]|`setSensorSetting(&(appConfig->camera.sensor.exposure_ctrl), 0)`|sensor.exposure_ctrl=0|
+|sensorSettings_t.aec2|Camera Sensor||int|[0, 1]|`setSensorSetting(&(appConfig->camera.sensor.aec2), 0)`|sensor.aec2=0|
+|sensorSettings_t.ae_level|Camera Sensor||int|[-2, 2]|`setSensorSetting(&(appConfig->camera.sensor.ae_level), 0)`|sensor.ae_level=0|
+|sensorSettings_t.aec_value|Camera Sensor||int|[0, 1200]|`setSensorSetting(&(appConfig->camera.sensor.aec_value), 0)`|sensor.aec), 0|
+|sensorSettings_t.gain_ctrl|Camera Sensor|0 = disable, 1 = enable.|int|[0, 1]|`setSensorSetting(&(appConfig->camera.sensor.gain_ctrl), 0)`|sensor.gain_ctrl=0|
+|sensorSettings_t.agc_gain|Camera Sensor||int|[0, 30]|`setSensorSetting(&(appConfig->camera.sensor.agc_gain), 0)`|sensor.agc_gain=0|
+|sensorSettings_t.bpc|Camera Sensor|0 = disable, 1 = enable.|int|[0, 1]|`setSensorSetting(&(appConfig->camera.sensor.bpc), 0)`|sensor.bpc=0|
+|sensorSettings_t.wpc|Camera Sensor|0 = disable, 1 = enable.|int|[0, 1]|`setSensorSetting(&(appConfig->camera.sensor.wpc), 0)`|sensor.wpc=0|
+|sensorSettings_t.raw_gma|Camera Sensor|0 = disable, 1 = enable.|int|[0, 1]|`setSensorSetting(&(appConfig->camera.sensor.raw_gma), 0)`|sensor.raw_gma=0|
+|sensorSettings_t.lenc|Camera Sensor|Set lens correction: 0 = disable, 1 = enable.|int|[0, 1]|`setSensorSetting(&(appConfig->camera.sensor.lenc), 0)`|sensor.lenc=0|
+|sensorSettings_t.hmirror|Camera Sensor|Horizontal mirrot: 0 = disable, 1 = enable.|int|[0, 1]|`setSensorSetting(&(appConfig->camera.sensor.hmirror), 0)`|sensor.hmirror=0|
+|sensorSettings_t.vflip|Camera Sensor|Vertical flip: 0 = disable, 1 = enable.|int|[0, 1]|`setSensorSetting(&(appConfig->camera.sensor.vflip), 0)`|sensor.vflip=0|
+|sensorSettings_t.colorbar|Camera Sensor|0 = disable, 1 = enable.|int|[0, 1]|`setSensorSetting(&(appConfig->camera.sensor.colorbar), 0)`|sensor.colorbar=|
+|sensorSettings_t.dcw|Camera Sensor||int||`setSensorSetting(&(appConfig->camera.sensor.dcw), 0)`|sensor.dcw=|
+|sensorSettings_t.sharpness|Camera Sensor||int||`setSensorSetting(&(appConfig->camera.sensor.sharpness), 0)`|sensor.sharpness=|
+|sensorSettings_t.denoise|Camera Sensor||int||`setSensorSetting(&(appConfig->camera.sensor.denoise), 0)`|sensor.denoise=0|
+|sensorSettings_t.quality|Camera Sensor||int||`setSensorSetting(&(appConfig->camera.sensor.quality), 0)`|sensor.quality=0|
 
 Create the file `config.cpp` from the model `config-example.cpp`.   
 In the function `setupAppConfig`, you can set the following parameters:  
@@ -109,14 +109,11 @@ void setupAppConfig(appConfig_t * appConfig) {
     
     // **** Camera sensor ****
     
-    appConfig->camera.sensor.gain_ctrl.enabled=true;
-    appConfig->camera.sensor.gain_ctrl.value=1;
-    appConfig->camera.sensor.exposure_ctrl.enabled=true;
-    appConfig->camera.sensor.exposure_ctrl.value=1;
-    appConfig->camera.sensor.awb_gain.enabled=true;
-    appConfig->camera.sensor.awb_gain.value=1;
-    appConfig->camera.sensor.brightness.enabled=true;
-    appConfig->camera.sensor.brightness.value=1;
+    setSensorSetting(&(appConfig->camera.sensor.gain_ctrl), 1);      // Auto gain on
+    setSensorSetting(&(appConfig->camera.sensor.exposure_ctrl), 1);  // Auto exposure on
+    setSensorSetting(&(appConfig->camera.sensor.awb_gain), 1);       // Auto White Balance enable (0 or 1)
+    setSensorSetting(&(appConfig->camera.sensor.brightness), 1);
+    setSensorSetting(&(appConfig->camera.sensor.gainceiling), 1);
 }
 ```
 
@@ -144,17 +141,15 @@ sensor.gain_ctrl=1
 sensor.exposure_ctrl=1
 sensor.awb_gain=1
 sensor.brightness=1
+sensor.gainceiling=1
 ```
 
 ## TODO
-- Log
 - Complete Readme.md
 - OTA
 - use begin instead of initXYZ
 - Rename file in C or use extern C { } as in sensor.h
-- SDConfig with section
-- SDConfig comments
-- setSensor function to avoid enabled=true
 - get default sensor values
 - test with framesize and pixformat
+- file header
 

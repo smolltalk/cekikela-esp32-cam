@@ -104,3 +104,8 @@ void endCamera(camera_fb_t **fb) {
   esp_camera_fb_return(*fb);
   disableLamp();
 }
+
+void setSensorSetting(sensorSetting_t *sensorSetting, int value){
+  sensorSetting->value = value;
+  sensorSetting->enabled = true;
+}

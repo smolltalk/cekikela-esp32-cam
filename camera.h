@@ -88,5 +88,6 @@ void disableLamp();
 void setLamp(int newVal);
 statusCode takePicture(camera_fb_t **fb);
 void endCamera(camera_fb_t **fb);
+void setSensorSetting(sensorSetting_t *sensorSetting, int value);
 
 #endif
