@@ -2,16 +2,19 @@
 #define UPLOADER_H
 
 #include "Arduino.h"
-#include "wifimgt.h"
+#include "error.h"
+#include "filename.h"
+#include "logging.h"
+#include "timemgt.h"
 #include "FS.h"
 #include "sd.h"
-#include "filename.h"
-#include "error.h"
-#include "timemgt.h"
+#include "wifimgt.h"
 
 #define SERVER_NAME_MAX_SIZE 64
 #define UPLOAD_PATH_MAX_SIZE 64
 #define AUTH_PATH_MAX_SIZE 32
+
+#define UPLOAD_LOG "Upload"
 
 typedef struct {
   bool enabled = false;

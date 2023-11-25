@@ -2,11 +2,14 @@
 #define CAMERA_H
 
 #include "Arduino.h"
+#include "driver/rtc_io.h"
+#include "error.h"
+#include "logging.h"
 #include "esp_camera.h"
 #include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
-#include "driver/rtc_io.h"
-#include "error.h"
+
+#define CAMERA_LOG "Camera"
 
 // Pin definition for CAMERA_MODEL_AI_THINKER
 #define PWDN_GPIO_NUM 32

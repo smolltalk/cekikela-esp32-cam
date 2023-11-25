@@ -4,6 +4,8 @@
 #include "cfgmgt.h"
 #include "error.h"
 
+#define APP_LOG "App"
+
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
 
 void zzzzZZZZ();

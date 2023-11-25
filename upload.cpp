@@ -6,11 +6,10 @@ DataUploader::DataUploader(uploadSettings_t *uploadSettings, uint32_t dataLen, S
 statusCode DataUploader::upload() {
   statusCode result = ok;
 
-  Serial.printf("Connecting to server: %s\n", uploadSettings->serverName);
+  logInfo(UPLOAD_LOG, "Connecting to server: %s\n", uploadSettings->serverName);
 
   if (client.connect(uploadSettings->serverName, uploadSettings->serverPort)) {
-    Serial.println("Connection successful!");
-    Serial.printf("Uploading file %s...\n", fileName);
+    logInfo(UPLOAD_LOG, "Uploading file %s...\n", fileName);
 
     String head = "--EspCamWebUpload\r\nContent-Disposition: form-data; name=\"auth\"\r\n\r\n" + String(uploadSettings->auth) + "\r\n--EspCamWebUpload\r\nContent-Disposition: form-data; name=\"fileToUpload\"; filename=\"" + fileName + "\"\r\nContent-Type: image/jpeg\r\n\r\n";
     String tail = "\r\n--EspCamWebUpload--\r\n";
@@ -62,10 +61,10 @@ statusCode DataUploader::upload() {
     statusCodeStr[statusCodeReadingPosition] = 0;
     // Convert status code to int
     int statusCode = atoi(statusCodeStr);
-    Serial.printf("\nResponse status code: %d\n", statusCode);
+    logInfo(UPLOAD_LOG, "\nResponse status code: %d\n", statusCode);
     result = statusCode == 200 ? ok : uploadPictureError;
   } else { 
-    Serial.printf("Connection to %s failed.\n", uploadSettings->serverName);
+    logError(UPLOAD_LOG, "Connection to %s failed.\n", uploadSettings->serverName);
     result = uploadPictureError;
   }
   return result;
@@ -109,11 +108,11 @@ statusCode uploadPictureFile(uploadSettings_t *uploadSettings, uint16_t i) {
   computePictureNameFromIndex(pictureFilePath + 1, i);
 
   fs::FS &fs = SD_MMC;
-  Serial.printf("Picture file name: %s\n", pictureFilePath);
+  logInfo(UPLOAD_LOG, "Picture file name: %s\n", pictureFilePath);
 
   File file = fs.open(pictureFilePath, FILE_READ);
   if (!file) {
-    Serial.printf("Failed to open file %s in reading mode\n", pictureFilePath);
+    logError(UPLOAD_LOG, "Failed to open file %s in reading mode\n", pictureFilePath);
     result = uploadPictureError;
   } else {
     FileDataUploader fdu(uploadSettings, file);

@@ -37,7 +37,7 @@ statusCode initCamera(cameraSettings_t *camera) {
   // Init Camera
   esp_err_t err = esp_camera_init(&config);
   if (err != ESP_OK) {
-    Serial.printf("Camera init failed with error 0x%x\n", err);
+    logError(CAMERA_LOG, "Camera init failed with error 0x%x\n", err);
     return cameraInitError;
   }
 
@@ -83,24 +83,20 @@ void setLamp(int newVal) {
     int pwmMax = pow(2, PWM_RESOLUTION) - 1;
     int brightness = round((pow(2, (1 + (newVal * 0.02))) - 2) / 6 * pwmMax);
     ledcWrite(LAMP_CHANNEL, brightness);
-    Serial.print("Lamp: ");
-    Serial.print(newVal);
-    Serial.print("%, pwm = ");
-    Serial.println(brightness);
   }
 #endif
 }
 
 statusCode takePicture(camera_fb_t **fb) {
   *fb = NULL;
-  Serial.print("Take a picture...");
+  logInfo(CAMERA_LOG, "Take a picture.");
   // Take Picture with Camera
   *fb = esp_camera_fb_get();
   if (!*fb) {
-    Serial.println(" Failed.");
+    logError(CAMERA_LOG, "Failed to take a picture.");
     return cameraTakePictureError;
   }
-  Serial.println(" Done.");
+  logInfo(CAMERA_LOG, "Done.");
   return ok;
 }
 

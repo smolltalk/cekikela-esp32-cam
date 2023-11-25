@@ -9,7 +9,7 @@ void switchOffRedLed() {
 }
 
 void signalError(statusCode code) {
-  Serial.printf("Signal error: %d.\n", code);
+  logInfo(ERROR_LOG, "Signal error: %d.", code);
 
   // Blink the number of code
   switchOffRedLed();

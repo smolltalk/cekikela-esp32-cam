@@ -6,7 +6,7 @@ statusCode initWifi(wifiSettings_t * wifi) {
   // Disabled?
   if (!wifi->enabled){
     result = wifiInitError;
-    Serial.printf("Wifi is disabled. Return with code: %d\n", result);
+    logInfo(WIFI_LOG, "Wifi is disabled. Return with code: %d\n", result);
     return result;
   }
   
@@ -15,12 +15,11 @@ statusCode initWifi(wifiSettings_t * wifi) {
   Serial.println();
   // Already connected? Cool. Return.
   if (WiFi.status() == WL_CONNECTED){
-    Serial.println("WiFi already connected.");
+    logInfo(WIFI_LOG, "WiFi already connected.");
     return result;
   }
   // Try to connect
-  Serial.print("Connecting to ");
-  Serial.println(wifi->ssid);
+  logInfo(WIFI_LOG, "Connecting to Wifi %s", wifi->ssid);
 
   WiFi.begin(wifi->ssid, wifi->password);
 
@@ -31,15 +30,14 @@ statusCode initWifi(wifiSettings_t * wifi) {
     connectAttemptCount++;
   }
 
-  Serial.println("");
+  Serial.println();
 
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("WiFi connected.");
-    Serial.println("IP address: ");
-    Serial.println(WiFi.localIP());
+    logInfo(WIFI_LOG, "WiFi connected.");
+    logInfo(WIFI_LOG, "IP address: %s", WiFi.localIP().toString().c_str());
   } else {
     result = wifiInitError;
-    Serial.println("Wifi NOT connected.");
+    logError(WIFI_LOG, "Wifi NOT connected.");
   }
 
   return result;

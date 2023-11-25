@@ -9,7 +9,7 @@
 #include "sensor.h"
 #include "upload.h"
 #include "wifimgt.h"
-#include "SDConfig.h"
+#include "FileConfig.h"
 
 #define CONFIG_FILE_NAME "/config.txt"
 #define CONFIG_VALUE_MAX_SIZE 100
@@ -30,8 +30,14 @@ typedef struct {
   bool alreadySet;
   const char * paramName;
   void * paramAddress;
-  void (*setter) (SDConfig *config, void * paramAddress);
+  void (*setter) (FileConfig *fileConfig, void * paramAddress);
 } paramSetter_t;
+
+typedef struct {
+  char * section;
+  paramSetter_t *params;
+  size_t paramCount;
+} sectionParamSetter_t;
 
 statusCode readConfigOnSDCard(appConfig_t * appConfig);
 

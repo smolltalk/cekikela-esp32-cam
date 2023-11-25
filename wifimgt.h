@@ -1,9 +1,12 @@
 #ifndef WIFIMGT_H
 #define WIFIMGT_H
 
-#include "Arduino.h" 
-#include <HTTPClient.h>
+#include "Arduino.h"
 #include "error.h"
+#include "logging.h"
+#include <HTTPClient.h>
+
+#define WIFI_LOG "Wifi"
 
 #define SSID_MAX_SIZE 32
 #define PASSWORD_MAX_SIZE 32

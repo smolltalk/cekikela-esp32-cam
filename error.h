@@ -2,6 +2,9 @@
 #define ERROR_H
 
 #include "Arduino.h"
+#include "logging.h"
+
+#define ERROR_LOG "Error"
 
 // Red LED
 #define RED_LED_PIN 33

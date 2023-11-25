@@ -120,7 +120,7 @@ statusCode runActions() {
 void zzzzZZZZ() {
   // Switch off the red led to inform that the program is stopped
   switchOffRedLed();
-  Serial.println("Going to sleep now.");
+  logInfo(APP_LOG, "Going to sleep now.");
   Serial.flush();
 
   // Wake up on PIR, ie on up edge on pin 12
@@ -128,13 +128,13 @@ void zzzzZZZZ() {
 
   // Wake up in TIME_TO_SLEEP seconds
   if (appConfig.awakePeriodSec) {
-    Serial.printf("I'll wake up in %d second(s).\n");
+    logInfo(APP_LOG, "I'll wake up in %d second(s).\n");
     esp_sleep_enable_timer_wakeup(appConfig.awakePeriodSec * uS_TO_S_FACTOR);
   }
 
   // Go to sleep
   esp_deep_sleep_start();
-  Serial.println("This will never be printed");
+  logInfo(APP_LOG, "This will never be printed");
 }
 
 void loop() {
