@@ -6,10 +6,10 @@ DataUploader::DataUploader(uploadSettings_t *uploadSettings, uint32_t dataLen, S
 statusCode DataUploader::upload() {
   statusCode result = ok;
 
-  logInfo(UPLOAD_LOG, "Connecting to server: %s\n", uploadSettings->serverName);
+  logInfo(UPLOAD_LOG, "Connecting to server: %s.", uploadSettings->serverName);
 
   if (client.connect(uploadSettings->serverName, uploadSettings->serverPort)) {
-    logInfo(UPLOAD_LOG, "Uploading file %s...\n", fileName);
+    logInfo(UPLOAD_LOG, "Uploading file %s...", fileName);
 
     String head = "--EspCamWebUpload\r\nContent-Disposition: form-data; name=\"auth\"\r\n\r\n" + String(uploadSettings->auth) + "\r\n--EspCamWebUpload\r\nContent-Disposition: form-data; name=\"fileToUpload\"; filename=\"" + fileName + "\"\r\nContent-Type: image/jpeg\r\n\r\n";
     String tail = "\r\n--EspCamWebUpload--\r\n";
@@ -61,10 +61,10 @@ statusCode DataUploader::upload() {
     statusCodeStr[statusCodeReadingPosition] = 0;
     // Convert status code to int
     int statusCode = atoi(statusCodeStr);
-    logInfo(UPLOAD_LOG, "\nResponse status code: %d\n", statusCode);
+    logInfo(UPLOAD_LOG, "Response status code: %d.", statusCode);
     result = statusCode == 200 ? ok : uploadPictureError;
   } else { 
-    logError(UPLOAD_LOG, "Connection to %s failed.\n", uploadSettings->serverName);
+    logError(UPLOAD_LOG, "%s: connection to %s failed.", __func__, uploadSettings->serverName);
     result = uploadPictureError;
   }
   return result;
@@ -108,11 +108,11 @@ statusCode uploadPictureFile(uploadSettings_t *uploadSettings, uint16_t i) {
   computePictureNameFromIndex(pictureFilePath + 1, i);
 
   fs::FS &fs = SD_MMC;
-  logInfo(UPLOAD_LOG, "Picture file name: %s\n", pictureFilePath);
+  logInfo(UPLOAD_LOG, "%s: picture file name: %s.", __func__, pictureFilePath);
 
   File file = fs.open(pictureFilePath, FILE_READ);
   if (!file) {
-    logError(UPLOAD_LOG, "Failed to open file %s in reading mode\n", pictureFilePath);
+    logError(UPLOAD_LOG, "%s: failed to open file %s in reading mode.", __func__, pictureFilePath);
     result = uploadPictureError;
   } else {
     FileDataUploader fdu(uploadSettings, file);

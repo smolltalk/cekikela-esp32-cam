@@ -63,6 +63,8 @@ statusCode runActions() {
 
   // Setup app config once
   if (!appConfig.setupConfigDone) {
+    sensorSettings_t settingsWithInitializedSetterOffset;
+    appConfig.camera.sensor = settingsWithInitializedSetterOffset; 
     setupAppConfig(&appConfig);
     appConfig.setupConfigDone = true;
 
@@ -128,7 +130,7 @@ void zzzzZZZZ() {
 
   // Wake up in TIME_TO_SLEEP seconds
   if (appConfig.awakePeriodSec) {
-    logInfo(APP_LOG, "I'll wake up in %d second(s).\n");
+    logInfo(APP_LOG, "I'll wake up in %d second(s).\n", appConfig.awakePeriodSec);
     esp_sleep_enable_timer_wakeup(appConfig.awakePeriodSec * uS_TO_S_FACTOR);
   }
 

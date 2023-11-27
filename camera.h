@@ -78,7 +78,7 @@ typedef struct {
   uint16_t getReadyDelayMs;
   union {
     sensorSettings_t sensor;
-    sensorSetting_t sensorSettingsArray[25];
+    sensorSetting_t sensorSettingsArray[27];
   };
 } cameraSettings_t;
 
@@ -89,5 +89,6 @@ void setLamp(int newVal);
 statusCode takePicture(camera_fb_t **fb);
 void endCamera(camera_fb_t **fb);
 void setSensorSetting(sensorSetting_t *sensorSetting, int value);
+void displayCameraStatus(const camera_status_t *status);
 
 #endif

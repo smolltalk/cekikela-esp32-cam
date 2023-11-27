@@ -7,25 +7,25 @@
 #define LOG_LEVEL LOG_LEVEL_DEBUG
 
 #if LOG_LEVEL >= LOG_LEVEL_ERROR
-#define logError(LOGGER, ARGS...) Serial.printf("[%s]   Error: ", LOGGER); Serial.printf(ARGS); Serial.println(); 
+#define logError(LOGGER, ARGS...) Serial.printf("\n%-8s|Error  | ", LOGGER); Serial.printf(ARGS);
 #else
 #define logError(LOGGER, ARGS...)
 #endif
 
 #if LOG_LEVEL >= LOG_LEVEL_WARN
-#define logWarn(LOGGER, ARGS...)  Serial.printf("[%s] Warning: ", LOGGER); Serial.printf(ARGS); Serial.println(); 
+#define logWarn(LOGGER, ARGS...)  Serial.printf("\n%-8s|Warning| ", LOGGER); Serial.printf(ARGS);
 #else
 #define logWarn(LOGGER, ARGS...)
 #endif
 
 #if LOG_LEVEL >= LOG_LEVEL_INFO
-#define logInfo(LOGGER, ARGS...)  Serial.printf("[%s]    Info: ", LOGGER); Serial.printf(ARGS); Serial.println(); 
+#define logInfo(LOGGER, ARGS...)  Serial.printf("\n%-8s|Info   | ", LOGGER); Serial.printf(ARGS);
 #else
 #define logInfo(LOGGER, ARGS...)
 #endif
 
 #if LOG_LEVEL >= LOG_LEVEL_DEBUG
-#define logDebug(LOGGER, ARGS...)  Serial.printf("[%s]  Debug: ", LOGGER); Serial.printf(ARGS); Serial.println(); 
+#define logDebug(LOGGER, ARGS...)  Serial.printf("\n%-8s|Debug  | ", LOGGER); Serial.printf(ARGS);
 #else
 #define logDebug(LOGGER, ARGS...)
 #endif

@@ -5,11 +5,14 @@
 #include "mbedtls/base64.h"
 #include "camera.h"
 #include "error.h"
+#include "logging.h"
 #include "SD.h"
 #include "sensor.h"
 #include "upload.h"
 #include "wifimgt.h"
 #include "FileConfig.h"
+
+#define CFG_LOG "Config"
 
 #define CONFIG_FILE_NAME "/config.txt"
 #define CONFIG_VALUE_MAX_SIZE 100

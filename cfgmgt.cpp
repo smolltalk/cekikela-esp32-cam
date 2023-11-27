@@ -47,22 +47,22 @@ statusCode readConfigOnSDCard(appConfig_t *appConfig) {
   // No requirement to read appConfig on SD Card
   // or appConfig has been already read
   if (!appConfig->readConfigOnSdCard) {
-    Serial.println("Do not read config on SD card.");
+    logInfo(CFG_LOG, "Do not read config on SD card.");
     return statusCode;
   }
   if (appConfig->configOnSdCardRead) {
-    Serial.println("Config on SD card already read.");
+    logInfo(CFG_LOG, "Config on SD card already read.");
     return statusCode;
   }
 
-  Serial.println("Read config on SD card...");
+  logInfo(CFG_LOG, "Read config on SD card...");
 
   appConfig->configOnSdCardRead = true;
 
   // Init SD Card
   statusCode = initSDCard();
   if (statusCode != ok) {
-    Serial.println("Failed to read config on SD card!");
+    logError(CFG_LOG, "Failed to read config on SD card!");
     return statusCode;
   }
 
@@ -132,7 +132,7 @@ statusCode readConfigOnSDCard(appConfig_t *appConfig) {
   };
 
   fs::FS &fs = SD_MMC;
-  Serial.printf("File %s %s.\n", CONFIG_FILE_NAME, fs.exists(CONFIG_FILE_NAME) ? "exists" : "does not exist");
+  logInfo(CFG_LOG, "File %s %s.", CONFIG_FILE_NAME, fs.exists(CONFIG_FILE_NAME) ? "exists" : "does not exist");
 
   FileConfig fileConfig;
 
@@ -142,17 +142,20 @@ statusCode readConfigOnSDCard(appConfig_t *appConfig) {
     size_t paramCount = sectionParams[0].paramCount;
     size_t sectionParamCount = sizeof(sectionParams) / sizeof(sectionParamSetter_t);
 
-    Serial.printf("Max param count=%d\n", paramCount);
+    logDebug(CFG_LOG, "Max param count=%d.", paramCount);
     while (fileConfig.readNextSetting()) {
       if (fileConfig.sectionChanged()) {
+        logDebug(CFG_LOG, "Config section changed: %s.", fileConfig.getSection());
         int i = 0;
         while (i < sectionParamCount && !fileConfig.sectionIs(sectionParams[i].section)) i++;
         if (i < sectionParamCount) {
           params = sectionParams[i].params;
           paramCount = sectionParams[i].paramCount;
+          logDebug(CFG_LOG, "The new section has been recognized: %s.", fileConfig.getSection());
         } else {
           params = NULL;
           paramCount = 0;
+          logWarn(CFG_LOG, "The new section has not been recognized: %s.", fileConfig.getSection());
         }
       }
 
@@ -162,25 +165,25 @@ statusCode readConfigOnSDCard(appConfig_t *appConfig) {
       }
 
       bool wrongParameter = true;
-      Serial.printf("Config current param name: %s.\n", fileConfig.getName());
+      logDebug(CFG_LOG, "Config current section and param name: [%s] %s.", fileConfig.getSection(), fileConfig.getName());
       for (int paramCpt = 0; paramCpt < paramCount; paramCpt++) {
         paramSetter_t *param = &(params[paramCpt]);
         if (!param->alreadySet && fileConfig.nameIs(param->paramName)) {
           param->alreadySet = true;
-          Serial.printf("Config call setter for param %s with value %s.\n", param->paramName, fileConfig.getValue());
+          logDebug(CFG_LOG, "Config call setter for param %s with value %s.", param->paramName, fileConfig.getValue());
           param->setter(&fileConfig, param->paramAddress);
           wrongParameter = false;
           break;
         }
       }
       if (wrongParameter) {
-        Serial.printf("Unknown or already defined parameter %s.\n", fileConfig.getName());
+        logError(CFG_LOG, "Unknown or already defined parameter %s.", fileConfig.getName());
       }
     }
     fileConfig.end();
-    Serial.printf("Config successfully read on SD card.");
+    logInfo(CFG_LOG, "Config successfully read on SD card.");
   } else {
-    Serial.printf("Failed to read config file %s!\n", CONFIG_FILE_NAME);
+    logError(CFG_LOG, "Failed to read config file %s!\n", CONFIG_FILE_NAME);
     statusCode = readConfigError;
   }
 

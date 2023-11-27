@@ -28,5 +28,8 @@ void updateTime(wifiSettings_t * wifi) {
       logError(TIME_LOG, "No WiFi, no NTP, no time updated.");
     }
   }
-  logInfo(TIME_LOG, "Time: %A, %B %d %Y %H:%M:%S", &timeSettings);
+#ifdef LOG_LEVEL >= LOG_LEVEL_INFO
+  logInfo(TIME_LOG, "Time: ");
+  Serial.println(&timeSettings, "%A, %B %d %Y %H:%M:%S");
+#endif
 }
