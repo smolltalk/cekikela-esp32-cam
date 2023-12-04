@@ -17,15 +17,15 @@
   copies or substantial portions of the Software.
 *********/
 
+#include "app.h"
 #include "camera.h"
-#include "upload.h"
-#include "sd.h"
+#include "cfgmgt.h"
 #include "error.h"
 #include "filename.h"
+#include "sd.h"
 #include "timemgt.h"
+#include "upload.h"
 #include "wifimgt.h"
-#include "cfgmgt.h"
-#include "app.h"
 
 // Initialize default config:
 // - Try to read the config on SD card
@@ -40,7 +40,9 @@ void setup() {
   switchOnRedLed();
   // Init serial
   Serial.begin(115200);
-  // Writing on SD card involves flash lighting
+  // Print starting message
+  Serial.printf("esp32-cam-sd-web-pir v%s started.\n", APP_VERSION);
+  // Writing on SD card involves disabling lamp to prevent flash lighting
   disableLamp();
   // Run all actions
   result = runActions();
@@ -112,6 +114,10 @@ statusCode runActions() {
       result = uploadPictureFiles(wifi, uploadSettings, &filesCounters);
     }
   }
+
+  // Update firmware
+  updateFirmware(wifi, appConfig.firmwareUpdateUrl, APP_VERSION);
+
   endWifi();
   endSDCard();
   endCamera(&fb);
@@ -131,7 +137,7 @@ void zzzzZZZZ() {
   // Wake up in TIME_TO_SLEEP seconds
   if (appConfig.awakePeriodSec) {
     logInfo(APP_LOG, "I'll wake up in %d second(s).\n", appConfig.awakePeriodSec);
-    esp_sleep_enable_timer_wakeup(appConfig.awakePeriodSec * uS_TO_S_FACTOR);
+    esp_sleep_enable_timer_wakeup(appConfig.awakePeriodSec * 1000000); // us to sec factor
   }
 
   // Go to sleep

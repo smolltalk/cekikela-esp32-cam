@@ -6,6 +6,7 @@
 #include "camera.h"
 #include "error.h"
 #include "logging.h"
+#include "ota.h"
 #include "SD.h"
 #include "sensor.h"
 #include "upload.h"
@@ -24,6 +25,7 @@ typedef struct {
   bool savePictureOnSdCard;
   uint16_t awakeDurationMs;
   uint16_t awakePeriodSec;
+  char firmwareUpdateUrl[FIRWARE_UPDATE_URL_SIZE];
   wifiSettings_t wifi;
   uploadSettings_t upload;
   cameraSettings_t camera;

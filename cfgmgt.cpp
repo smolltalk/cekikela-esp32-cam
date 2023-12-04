@@ -69,7 +69,8 @@ statusCode readConfigOnSDCard(appConfig_t *appConfig) {
   paramSetter_t rootParams[] = {
     { false, "savePictureOnSdCard", &(appConfig->savePictureOnSdCard), setBool },
     { false, "awakeDurationMs", &(appConfig->awakeDurationMs), setUint16 },
-    { false, "awakePeriodSec", &(appConfig->awakePeriodSec), setUint16 }
+    { false, "awakePeriodSec", &(appConfig->awakePeriodSec), setUint16 },
+    { false, "firmwareUpdateUrl", appConfig->firmwareUpdateUrl, copyCharStr }
   };
 
   paramSetter_t wifiParams[] = {

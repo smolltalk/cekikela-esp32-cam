@@ -4,12 +4,11 @@
 #include "cfgmgt.h"
 #include "error.h"
 
+#define APP_VERSION "0.1.0"
 #define APP_LOG "App"
 
-#define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
-
-void zzzzZZZZ();
 statusCode runActions();
 void setupAppConfig(appConfig_t * appConfig);
+void zzzzZZZZ();
 
 #endif
