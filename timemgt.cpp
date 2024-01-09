@@ -1,12 +1,13 @@
 #include "timemgt.h"
 
-void updateTime(wifiSettings_t * wifi) {
+void updateTime(wifiSettings_t * wifi, uint8_t syncTimePeriodHours) {
   struct tm timeSettings;
   bool updateTimeFromNtp = false;
   static RTC_DATA_ATTR time_t lastUpdateTime;
 
   if (getLocalTime(&timeSettings)) {
-    if (difftime(mktime(&timeSettings), lastUpdateTime) > UPDATE_TIME_PERIOD_SEC) {
+    // / 3600 to compare hours
+    if (difftime(mktime(&timeSettings), lastUpdateTime) / 3600 > syncTimePeriodHours) {
       updateTimeFromNtp = true;
       logInfo(TIME_LOG, "It's time to update time.");
     }

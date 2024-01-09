@@ -3,7 +3,7 @@
 ## Getting started
 
 - Copy config-example.cpp to config.cpp
-- Rename setupAppConfigExample to setupAppConfig
+- Rename initAppConfigExample to initAppConfig
 
 ## Settings
 
@@ -53,7 +53,7 @@
 |sensorSettings_t.quality|Camera Sensor||int||16|`setSensorSetting(&(appConfig->camera.sensor.quality), 0)`|sensor.quality=0|
 
 Create the file `config.cpp` from the model `config-example.cpp`.   
-In the function `setupAppConfig`, you can set the following parameters:  
+In the function `initAppConfig`, you can set the following parameters:  
 
 Further details are available in `sensor.h` and [here](https://randomnerdtutorials.com/esp32-cam-ov2640-camera-settings/)
 ## Examples  
@@ -65,7 +65,7 @@ Further details are available in `sensor.h` and [here](https://randomnerdtutoria
 ```C
 #include "cfgmgt.h"
 
-void setupAppConfig(appConfig_t * appConfig) {
+void initAppConfig(appConfig_t * appConfig) {
     // **** General ****
     
     // Save picture on SD card
@@ -154,7 +154,6 @@ gainceiling=1
 
 ## TODO
 - Complete Readme.md
-- OTA
 - use begin instead of initXYZ
 - Rename file in C or use extern C { } as in sensor.h
 - test with framesize and pixformat

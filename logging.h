@@ -1,3 +1,4 @@
+#define LOG_LEVEL_TRACE 5
 #define LOG_LEVEL_DEBUG 4
 #define LOG_LEVEL_INFO 3
 #define LOG_LEVEL_WARN 2
@@ -29,3 +30,5 @@
 #else
 #define logDebug(LOGGER, ARGS...)
 #endif
+
+#define bool_str(V) V ? "true" : "false"

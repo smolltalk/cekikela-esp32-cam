@@ -12,7 +12,7 @@
 #define PASSWORD_MAX_SIZE 32
 
 typedef struct {
-  bool enabled = false;
+  bool enabled;
   char ssid[SSID_MAX_SIZE + 1];
   char password[PASSWORD_MAX_SIZE + 1];
   uint8_t connectAttemptMax;
@@ -20,5 +20,9 @@ typedef struct {
 
 statusCode initWifi(wifiSettings_t * wifi);
 void endWifi();
+
+void displayMacAddressHex();
+void displayMacAddressDecArray();
+void fillReverseMacAddress(byte * result);
 
 #endif

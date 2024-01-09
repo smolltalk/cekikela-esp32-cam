@@ -46,3 +46,33 @@ statusCode initWifi(wifiSettings_t * wifi) {
 void endWifi() {
   WiFi.disconnect();
 }
+
+void displayMacAddressHex(){
+  byte mac[6];
+  WiFi.macAddress(mac);
+  for (int i = 5; i >= 0; i --){
+    Serial.print(mac[i], HEX);
+    if (i > 0) {
+      Serial.print(":");
+    }
+  }
+}
+
+void displayMacAddressDecArray(){
+  byte mac[6];
+  WiFi.macAddress(mac);
+  Serial.print("[");
+  for (int i = 5; i >= 0; i --){
+    Serial.print(mac[i]);
+    if (i > 0) {
+      Serial.print(", ");
+    }
+  }
+  Serial.print("]");
+}
+
+void fillReverseMacAddress(byte * result) {
+  byte mac[6];
+  WiFi.macAddress(mac);
+  for(int i = 0; i < 6; i++) result[i] = mac[5-i];
+}

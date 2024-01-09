@@ -1,7 +1,7 @@
 #include "cfgmgt.h"
 
-// Copy that function in config.cpp and rename it to setupAppConfig
-void setupAppConfigExample(appConfig_t* appConfig) {
+// Copy that function in config.cpp and rename it to initAppConfig
+void initAppConfigExample(appConfig_t* appConfig) {
   // Camera sensor settings
   // Adjustments from https://forum.arduino.cc/t/about-esp32cam-image-too-dark-how-to-fix/1015490/5
   setSensorSetting(&(appConfig->camera.sensor.gain_ctrl), 1);      // Auto gain on

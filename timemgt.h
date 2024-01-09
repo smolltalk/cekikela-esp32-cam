@@ -13,9 +13,9 @@
 #define GMT_OFFSET_SEC 0
 #define DAYLIGHT_OFFSET_SEC 3600
 
-// Update time period = 24h
-#define UPDATE_TIME_PERIOD_SEC 86400
+// Sync time period = 24H
+#define SYNC_TIME_PERIOD_HOURS_DEFAULT 24
 
-void updateTime(wifiSettings_t* wifi);
+void updateTime(wifiSettings_t* wifi, uint8_t syncTimePeriodHours);
 
 #endif

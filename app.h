@@ -4,11 +4,13 @@
 #include "cfgmgt.h"
 #include "error.h"
 
-#define APP_VERSION "0.1.0"
+// Logger name for this module
 #define APP_LOG "App"
+// Current application version
+#define APP_VERSION "0.3.0"
 
-statusCode runActions();
-void setupAppConfig(appConfig_t * appConfig);
+void setup();
+statusCode takeAndSavePicture();
 void zzzzZZZZ();
 
 #endif

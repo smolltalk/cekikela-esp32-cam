@@ -38,6 +38,8 @@
 // duty cycle bit range
 #define PWM_RESOLUTION 9
 
+#define GET_READY_DELAY_MS_DEFAULT 1500
+ 
 typedef struct {
   bool enabled;
   int value;

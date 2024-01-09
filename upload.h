@@ -17,7 +17,7 @@
 #define UPLOAD_LOG "Upload"
 
 typedef struct {
-  bool enabled = false;
+  bool enabled;
   char serverName[SERVER_NAME_MAX_SIZE + 1];
   int serverPort;
   char path[UPLOAD_PATH_MAX_SIZE + 1];

@@ -1,6 +1,6 @@
 #include "sd.h"
 
-statusCode initSDCard() {
+statusCode initSdCard() {
   uint8_t cardType = SD_MMC.cardType();
 
   // SD card has been already initialized?
@@ -39,7 +39,7 @@ statusCode initSDCard() {
   return ok;
 }
 
-void endSDCard() {
+void endSdCard() {
   logInfo(SD_LOG, "SD card unmounted.");
   SD_MMC.end();
 }
@@ -48,7 +48,7 @@ statusCode readFilesCounters(FilesCounters *filesCounters) {
   statusCode result = ok;
 
   // Init SD Card
-  result = initSDCard();
+  result = initSdCard();
   if (result != ok) {
     return result;
   }
@@ -96,7 +96,7 @@ statusCode writeFilesCounters(FilesCounters *filesCounters) {
   logDebug(SD_LOG, "%s...", __func__);
 
   // Init SD Card
-  statusCode result = initSDCard();
+  statusCode result = initSdCard();
   if (result != ok) {
     return result;
   }
@@ -128,7 +128,7 @@ statusCode readOrCreateFilesCounters(FilesCounters *filesCounters) {
   return (readFilesCounters(filesCounters) == ok) ? ok : createFilesCounters(filesCounters);
 }
 
-statusCode savePictureOnSDCard(char *pictureName, uint8_t *buf, size_t len) {
+statusCode savePictureOnSdCard(char *pictureName, uint8_t *buf, size_t len) {
   logDebug(SD_LOG, "%s...", __func__);
   statusCode result = ok;
 

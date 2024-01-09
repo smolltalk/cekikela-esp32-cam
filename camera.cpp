@@ -60,8 +60,8 @@ statusCode initCamera(cameraSettings_t *camera) {
     }
   }
 
-#ifdef LOG_LEVEL >= LOG_LEVEL_DEBUG
-  logDebug(CAMERA_LOG, "Sensor with customer settings:\n");
+#ifdef LOG_LEVEL >= LOG_LEVEL_INFO
+  logInfo(CAMERA_LOG, "Sensor with customer settings:\n");
   displayCameraStatus(&(s->status));
 #endif
 
@@ -121,32 +121,32 @@ void setSensorSetting(sensorSetting_t *sensorSetting, int value) {
 
 // Display camera status attributes
 void displayCameraStatus(const camera_status_t *status) {
-    logDebug(CAMERA_LOG, "- framesize      = %d", status->framesize);
-    logDebug(CAMERA_LOG, "- scale          = %s",status->scale ? "true" : "false");
-    logDebug(CAMERA_LOG, "- binning        = %s", status->binning ? "true" : "false");
-    logDebug(CAMERA_LOG, "- quality        = %d", status->quality);
-    logDebug(CAMERA_LOG, "- brightness     = %d", status->brightness);
-    logDebug(CAMERA_LOG, "- contrast       = %d", status->contrast);
-    logDebug(CAMERA_LOG, "- saturation     = %d", status->saturation);
-    logDebug(CAMERA_LOG, "- sharpness      = %d", status->sharpness);
-    logDebug(CAMERA_LOG, "- denoise        = %d", status->denoise);
-    logDebug(CAMERA_LOG, "- special_effect = %d", status->special_effect);
-    logDebug(CAMERA_LOG, "- wb_mode        = %d", status->wb_mode);
-    logDebug(CAMERA_LOG, "- awb            = %d", status->awb);
-    logDebug(CAMERA_LOG, "- awb_gain       = %d", status->awb_gain);
-    logDebug(CAMERA_LOG, "- aec            = %d", status->aec);
-    logDebug(CAMERA_LOG, "- aec2           = %d", status->aec2);
-    logDebug(CAMERA_LOG, "- ae_level       = %d", status->ae_level);
-    logDebug(CAMERA_LOG, "- aec_value      = %d", status->aec_value);
-    logDebug(CAMERA_LOG, "- agc            = %d", status->agc);
-    logDebug(CAMERA_LOG, "- agc_gain       = %d", status->agc_gain);
-    logDebug(CAMERA_LOG, "- gainceiling    = %d", status->gainceiling);
-    logDebug(CAMERA_LOG, "- bpc            = %d", status->bpc);
-    logDebug(CAMERA_LOG, "- wpc            = %d", status->wpc);
-    logDebug(CAMERA_LOG, "- raw_gma        = %d", status->raw_gma);
-    logDebug(CAMERA_LOG, "- lenc           = %d", status->lenc);
-    logDebug(CAMERA_LOG, "- hmirror        = %d", status->hmirror);
-    logDebug(CAMERA_LOG, "- vflip          = %d", status->vflip);
-    logDebug(CAMERA_LOG, "- dcw            = %d", status->dcw);
-    logDebug(CAMERA_LOG, "- colorbar       = %d", status->colorbar);
+    logInfo(CAMERA_LOG, "- framesize      = %d", status->framesize);
+    logInfo(CAMERA_LOG, "- scale          = %s", bool_str(status->scale));
+    logInfo(CAMERA_LOG, "- binning        = %s", bool_str(status->binning));
+    logInfo(CAMERA_LOG, "- quality        = %d", status->quality);
+    logInfo(CAMERA_LOG, "- brightness     = %d", status->brightness);
+    logInfo(CAMERA_LOG, "- contrast       = %d", status->contrast);
+    logInfo(CAMERA_LOG, "- saturation     = %d", status->saturation);
+    logInfo(CAMERA_LOG, "- sharpness      = %d", status->sharpness);
+    logInfo(CAMERA_LOG, "- denoise        = %d", status->denoise);
+    logInfo(CAMERA_LOG, "- special_effect = %d", status->special_effect);
+    logInfo(CAMERA_LOG, "- wb_mode        = %d", status->wb_mode);
+    logInfo(CAMERA_LOG, "- awb            = %d", status->awb);
+    logInfo(CAMERA_LOG, "- awb_gain       = %d", status->awb_gain);
+    logInfo(CAMERA_LOG, "- aec            = %d", status->aec);
+    logInfo(CAMERA_LOG, "- aec2           = %d", status->aec2);
+    logInfo(CAMERA_LOG, "- ae_level       = %d", status->ae_level);
+    logInfo(CAMERA_LOG, "- aec_value      = %d", status->aec_value);
+    logInfo(CAMERA_LOG, "- agc            = %d", status->agc);
+    logInfo(CAMERA_LOG, "- agc_gain       = %d", status->agc_gain);
+    logInfo(CAMERA_LOG, "- gainceiling    = %d", status->gainceiling);
+    logInfo(CAMERA_LOG, "- bpc            = %d", status->bpc);
+    logInfo(CAMERA_LOG, "- wpc            = %d", status->wpc);
+    logInfo(CAMERA_LOG, "- raw_gma        = %d", status->raw_gma);
+    logInfo(CAMERA_LOG, "- lenc           = %d", status->lenc);
+    logInfo(CAMERA_LOG, "- hmirror        = %d", status->hmirror);
+    logInfo(CAMERA_LOG, "- vflip          = %d", status->vflip);
+    logInfo(CAMERA_LOG, "- dcw            = %d", status->dcw);
+    logInfo(CAMERA_LOG, "- colorbar       = %d", status->colorbar);
 }
