@@ -17,14 +17,14 @@
 #define CFG_LOG "Config"
 
 // Config file path on the SD card
-#define CONFIG_FILE_NAME "/config.txt"
+#define CFG_CONFIG_FILE_NAME "/config.txt"
 // Maximum size in byte of a parameter value
-#define CONFIG_VALUE_MAX_SIZE 100
+#define CFG_CONFIG_VALUE_MAX_SIZE 100
 
-// Default value for the parameter appConfig_t.awakeDurationMs
+// Default value for the parameter app_config_t.awakeDurationMs
 #define AWAKE_DURATION_MS_DEFAULT 2000 /* 2s */
-// Default value for the parameter appConfig_t.awakePeriodSec
-#define AWAKE_PERIOD_SEC_DEFAULT 0
+// Default value for the parameter app_config_t.deepSleepDurationSec
+#define DEEP_SLEEP_DURATION_SEC_DEFAULT 0
 
 /**
  * Structure of the application configuration.
@@ -41,31 +41,56 @@ typedef struct {
   bool ignoreConfigFromSdCardReadError;  // User. Set it to true to ignore errors occuring during the configuration file reading.
   bool savePictureOnSdCard;              // User. Set it to true to save pictures on the SD card.
   uint16_t awakeDurationMs;              // User. Set a value in milliseconds to pause once the picture is taken to prevent picture burst.
-  uint16_t awakePeriodSec;               // User. Set a value in seconds defining the deep sleep duration before the wake up. 0 means infinite.
-  uint8_t syncTimePeriodHours;           // User. Set a value in hours defining the period to synchronize the time by NTP.
-  wifiSettings_t wifi;                   // User. Set the WiFi settings. See wifiSettings_t.
-  otaSettings_t ota;                     // User. Set the OTA settings. See otaSettings_t.
-  uploadSettings_t upload;               // User. Set the picture upload settings. See uploadSettings_t.
-  cameraSettings_t camera;               // User. Set the camera settings. See cameraSettings_t.
-} appConfig_t;
+  uint16_t deepSleepDurationSec;         // User. Set a value in seconds defining the deep sleep duration before the wake up. 0 means infinite.
+  wifi_settings_t wifi;                  // User. Set the WiFi settings. See wifi_settings_t.
+  time_settings_t time;                  // User. Set the time settings like the NTP server address. See time_settings_t.
+  ota_settings_t ota;                    // User. Set the OTA settings. See ota_settings_t.
+  upload_settings_t upload;              // User. Set the picture upload settings. See upload_settings_t.
+  camera_settings_t camera;              // User. Set the camera settings. See camera_settings_t.
+} app_config_t;
 
-statusCode initAppConfig(appConfig_t *appConfig);
-void initAppConfigWithDefaultValues(appConfig_t *appConfig);
-void initAppConfigWithCustomValues(appConfig_t *appConfig);
-void logAppConfig(appConfig_t *appConfig);
+/**
+ * @brief Initialize the app_config_t structure given in parameter.
+ *
+ * @param appConfig
+ *
+ * @return the initialization result, especially about the config file reading
+ *
+ */
+status_code_t initAppConfig(app_config_t *appConfig);
+
+/**
+ * @brief Set all default values of the application configuration.
+ */
+void initAppConfigWithDefaultValues(app_config_t *appConfig);
+
+/**
+ * @brief Set the application configurations attributes with custom values.
+ *        This function is implemented in config.cpp.
+ */
+void initAppConfigWithCustomValues(app_config_t *appConfig);
+
+/**
+ * @brief Log all the attributes of the application configuration.
+ * It uses the INFO log level.
+ *
+ * @param appConfig
+ */
+void logAppConfig(app_config_t *appConfig);
 
 /**
  * Helper structure defining one parameter that can be read in the configuration file.
- * It helps readConfigFromSdCard to fill the appConfig_t structure in the right way when
+ * It helps readConfigFromSdCard to fill the app_config_t structure in the right way when
  * the parameter is met in the configuration file.
  *
  * @see readConfigFromSdCard()
  */
-typedef struct {
-  bool alreadySet; // False until the parameter has been read once in the configuration file
-  const char *paramName; // Parameter name.
-  void *paramValueAddress; // parameter value address
-  void (*setter)(FileConfig *fileConfig, void *paramValueAddress);
+typedef struct paramSetter_t {
+  bool alreadySet;                                                    // False until the parameter has been read once in the configuration file
+  const char *paramName;                                              // Parameter name.
+  void *paramValueAddress;                                            // Parameter value address
+  void (*setter)(FileConfig *fileConfig, paramSetter_t *paramSetter); // Reference to the function assigning the value
+  uint8_t maxSize;                                                    // Value max size: used to avoid memory overflow with C strings
 } paramSetter_t;
 
 /**
@@ -80,16 +105,130 @@ typedef struct {
   char *section;
   paramSetter_t *params;
   size_t paramCount;
-} sectionParamSetter_t;
+} section_param_setter_t;
 
-statusCode readConfigFromSdCard(appConfig_t *appConfig);
-void setBool(FileConfig *fileConfig, void *paramValueAddress);
-void setInt(FileConfig *fileConfig, void *paramValueAddress);
-void setUint16(FileConfig *fileConfig, void *paramValueAddress);
-void setUint8(FileConfig *fileConfig, void *paramValueAddress);
-void copyCString(FileConfig *fileConfig, void *paramValueAddress);
-void copyEncryptedCString(FileConfig *fileConfig, void *paramValueAddress);
+/**
+ * @brief Read the configuration file on SD card and fills the
+ *        application configuration structure.
+ * 
+ * @param appConfig
+ * @return IS_OK on successful reading
+ *         or READ_CONFIG_ERROR on read error
+ *         or SD_INIT_ERROR when the SD card could not be mounted
+ */
+status_code_t readConfigFromSdCard(app_config_t *appConfig);
+
+/**
+ * @brief Set the memory location referenced by paramValueAddress
+ *        with the current FileConfig parameter value casted as bool.
+ *
+ * @param fileConfig  a reference to FileConfig handle the configuration file reading
+ * @param paramSetter a reference to parameter setter structure
+ *                    containing the (app_config_t) parameter address
+ *
+ * @see readConfigFromSdCard()
+ */
+void setBool(FileConfig *fileConfig, paramSetter_t *paramSetter);
+
+/**
+ * @brief Set the memory location referenced by paramValueAddress
+ *        with the current FileConfig parameter value casted as int.
+ *
+ * @param fileConfig  a reference to FileConfig handle the configuration file reading
+ * @param paramSetter a reference to parameter setter structure
+ *                    containing the (app_config_t) parameter address
+ *
+ * @see readConfigFromSdCard()
+ */
+void setInt(FileConfig *fileConfig, paramSetter_t *paramSetter);
+
+/**
+ * @brief Set the memory location referenced by paramValueAddress
+ *        with the current FileConfig parameter value casted as long.
+ *
+ * @param fileConfig  a reference to FileConfig handle the configuration file reading
+ * @param paramSetter a reference to parameter setter structure
+ *                    containing the (app_config_t) parameter address
+ *
+ * @see readConfigFromSdCard()
+ */
+void setLong(FileConfig *fileConfig, paramSetter_t *paramSetter);
+
+/**
+ * @brief Set the memory location referenced by paramValueAddress
+ *        with the current FileConfig parameter value casted as uint16_t.
+ *
+ * @param fileConfig  a reference to FileConfig handle the configuration file reading
+ * @param paramSetter a reference to parameter setter structure
+ *                    containing the (app_config_t) parameter address
+ *
+ * @see readConfigFromSdCard()
+ */
+void setUint16(FileConfig *fileConfig, paramSetter_t *paramSetter);
+
+/**
+ * @brief Set the memory location referenced by paramValueAddress
+ *        with the current FileConfig parameter value casted as uint8_t.
+ *
+ * @param fileConfig  a reference to FileConfig handle the configuration file reading
+ * @param paramSetter a reference to parameter setter structure
+ *                    containing the (app_config_t) parameter address
+ *
+ * @see readConfigFromSdCard()
+ */
+void setUint8(FileConfig *fileConfig, paramSetter_t *paramSetter);
+
+/**
+ * @brief Copy to the memory location referenced by paramValueAddress
+ *        the current FileConfig parameter value casted as a C string.
+ *
+ * @param fileConfig  a reference to FileConfig handle the configuration file reading
+ * @param paramSetter a reference to parameter setter structure
+ *                    containing the (app_config_t) parameter address
+ *                    and the C string max size
+ *
+ * @see readConfigFromSdCard()
+ */
+void copyCString(FileConfig *fileConfig, paramSetter_t *paramSetter);
+
+/**
+ * @brief Copy to the memory location referenced by paramValueAddress
+ *        the current FileConfig parameter decrypted value casted as a C string.
+ *
+ * @param fileConfig  a reference to FileConfig handle the configuration file reading
+ * @param paramSetter a reference to parameter setter structure
+ *                    containing the (app_config_t) parameter address
+ *                    and the C string max size
+ *
+ * @see decryptToCString()
+ * @see readConfigFromSdCard()
+ */
+void copyEncryptedCString(FileConfig *fileConfig, paramSetter_t *paramSetter);
+
+/**
+ * @brief Set the sensorSetting variable referenced by sensorSettingAddress
+ *        with the current FileConfig parameter value casted as int.
+ *
+ * @param fileConfig  a reference to FileConfig handle the configuration file reading
+ * @param paramSetter a reference to parameter setter structure
+ *                    containing the reference to the sensor parameter (sensor_param_setter_t) to set.
+ *
+ * @see readConfigFromSdCard()
+ */
+void setCameraSensorSetting(FileConfig *fileConfig, paramSetter_t *paramSetter);
+
+/**
+ * @brief Decrypt a base64 C string to a C string.
+ *
+ * @param dest the destination buffer receiving the decrypted C string.
+ * @param dlen the max size of the destination buffer.
+ * @param olen the effective length of the decrypted C string.
+ * @param b64Src the base64 source C string to decrypt.
+ * @param key the byte array key used to decrypt b64Src.
+ * @param keyLen the key size.
+ *
+ * @see copyEncryptedCString()
+ */
 void decryptToCString(char *dest, const size_t dlen, size_t *olen, const char *b64Src, const char *key, const size_t keyLen);
-void setCameraSensorSetting(FileConfig *fileConfig, void *sensorSettingAddress);
 
 #endif

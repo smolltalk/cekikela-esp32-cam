@@ -1,22 +1,21 @@
 /**
- * Esp32-cam-sd-web-pir an application for the ESP32-Cam platform.
+ * Cekikela-esp32-cam is an application for the ESP32-Cam platform.
  * Triggered by a PIR or an internal timer, it takes a picture
  * and saves it on SD card and/or uploads it to a web server.
  * The application is fully configurable by instructions and by 
  * file stored on the SD card.
  * See the readme for details.
  * 
- * The original project is named CeKiKeLa (C'est qui qu'est là ? - Who's there?).
+ * The project is named CeKiKeLa which means "C'est qui qu'est là ?"" i.e. "Who's there?".
  * It is hosted by the 'fab lab' MakerSpace56 (https://makerspace56.org).
  * It aims to take picture of birds (passerines) like robins and chickadees.
  *
  * Usage:
- *  - Select Board "AI Thinker ESP32-CAM"
- *  - GPIO 0 must be connected to GND to upload a sketch
- *  - After connecting GPIO 0 to GND, press the ESP32-CAM on-board RESET button to put your board in flashing mode
- *  - If you use a PIR, connect it to GPIO 12
- *  - if you want OTA feature, select the right partition scheme (Arduino IDE > Tool > Partition scheme):
+ *  - In the Arduino IDE, select Board "AI Thinker ESP32-CAM"
+ *  - To enable the OTA feature, select the right partition scheme (Arduino IDE > Tool > Partition scheme):
  *    "Minimal SPIFFS (1.9MB APP with OTA /190KB SPIFFS)"
+ *  - If you use a PIR, connect it to GPIO 12
+ *
  *
  * Special thanks to Rui Santos
  * for its project details at https://RandomNerdTutorials.com/esp32-cam-take-photo-save-microsd-card
@@ -25,7 +24,7 @@
  * Licensed under LGPL version 2.1
  * a version of which should have been supplied with this file.
  *
- * Github: https://github.com/smolltalk/esp32-cam-sd-web-pir
+ * Github: https://github.com/smolltalk/cekikela-esp32-cam
  * Author: Sébastien Morvan (morvan.sebastien@gmail.com)
  *
  */
@@ -34,10 +33,10 @@
 
 // Initialize default config and save the config in the RTC memory.
 // Thus, the config is kept along deep sleep.
-RTC_DATA_ATTR appConfig_t appConfig = { .setupConfigDone = false };
+RTC_DATA_ATTR app_config_t appConfig = { .setupConfigDone = false };
 
 /**
- * The program starts here.
+ * The application starts here.
  * No loop.
  * Basically, it
  * - initializes the red led and serial bus
@@ -49,7 +48,7 @@ RTC_DATA_ATTR appConfig_t appConfig = { .setupConfigDone = false };
  * - goes sleeping, waiting for a PIR and/or timer interrupt
  */
 void setup() {
-  statusCode result;
+  status_code_t result;
   // Switch on the red led to inform that the program is running
   pinMode(RED_LED_PIN, OUTPUT);
   // Indicate the board is awake
@@ -76,7 +75,7 @@ void setup() {
 }
 
 /**
- * Takes the picture and saves it:
+ * Take the picture and save it:
  * - setup the application configuration (by instruction and by file on SD card when enabled)
  * - initialize the camera 
  * - take the picture
@@ -85,62 +84,63 @@ void setup() {
  * - upload the picture when enabled
  * - check for a firmware update by OTA
  *
- * @return statusCode which is used by signalError
+ * @return status_code_t which is used by signalError
  */
-statusCode takeAndSavePicture() {
-  statusCode result = ok;
+status_code_t takeAndSavePicture() {
+  status_code_t result = IS_OK;
   bool pictureSavedOnSd = false;
   camera_fb_t *fb = NULL;
   char pictureName[20];
-  FilesCounters filesCounters;
+  fileCounters_t fileCounters;
 
   // Setup App Config
-  if ((result = initAppConfig(&appConfig)) != ok) {
+  if ((result = initAppConfig(&appConfig)) != IS_OK) {
     return result;
   }
 
-  wifiSettings_t *wifi = &(appConfig.wifi);
-  otaSettings_t *ota = &(appConfig.ota);
-  uploadSettings_t *uploadSettings = &(appConfig.upload);
+  wifi_settings_t *wifi = &(appConfig.wifi);
+  time_settings_t *time = &(appConfig.time);
+  ota_settings_t *ota = &(appConfig.ota);
+  upload_settings_t *uploadSettings = &(appConfig.upload);
 
   // Init camera
-  if ((result = initCamera(&(appConfig.camera))) != ok) {
+  if ((result = initCamera(&(appConfig.camera))) != IS_OK) {
     return result;
   }
 
   // Take picture
-  if ((result = takePicture(&fb)) != ok) {
+  if ((result = takePicture(&fb)) != IS_OK) {
     return result;
   }
 
   // Sync time with NTP
-  updateTime(wifi, appConfig.syncTimePeriodHours);
+  syncTime(wifi, time);
 
   if (appConfig.savePictureOnSdCard) {
     // Writing on SD card involves flash lighting
     disableLamp();
-    if ((result = initSdCard()) == ok && (result = readOrCreateFilesCounters(&filesCounters)) == ok) {
-      computePictureNameFromIndex(pictureName, filesCounters.pictureCounter + 1);
-      if ((result = savePictureOnSdCard(pictureName, fb->buf, fb->len)) == ok) {
-        filesCounters.pictureCounter++;
-        writeFilesCounters(&filesCounters);
+    if ((result = initSdCard()) == IS_OK && (result = loadOrCreateFileCounters(&fileCounters)) == IS_OK) {
+      computePictureNameFromIndex(pictureName, fileCounters.pictureCounter + 1);
+      if ((result = savePictureOnSdCard(pictureName, fb->buf, fb->len)) == IS_OK) {
+        fileCounters.pictureCounter++;
+        saveFileCounters(&fileCounters);
         pictureSavedOnSd = true;
       }
     }
   }
   if (appConfig.upload.enabled) {
     if (!pictureSavedOnSd) {
-      statusCode uploadResult;
+      status_code_t uploadResult;
       // Failed to saved on SD card, then try to upload.
       computePictureNameFromRandom(pictureName, uploadSettings->fileNameRandSize);
       uploadResult = uploadPicture(wifi, uploadSettings, pictureName, fb->buf, fb->len);
       // Don't override result when result already contains an error code.
-      if (result == ok) {
+      if (result == IS_OK) {
         result = uploadResult;
       }
     } else {
       // Upload a bunch of files.
-      result = uploadPictureFiles(wifi, uploadSettings, &filesCounters);
+      result = uploadPictureFiles(wifi, uploadSettings, &fileCounters);
     }
   }
 
@@ -155,8 +155,8 @@ statusCode takeAndSavePicture() {
 }
 
 /**
-  * Prepares the deep sleep and how to be waked up.
-  */
+ * Prepare the deep sleep and how to be waked up.
+ */
 void zzzzZZZZ() {
   // Switch off the red led to inform that the program is stopped
   switchOffRedLed();
@@ -166,10 +166,10 @@ void zzzzZZZZ() {
   // Wake up by PIR, ie on up edge on pin 12
   esp_sleep_enable_ext0_wakeup(GPIO_NUM_12, 1);
 
-  // Wake up after a configurable period
-  if (appConfig.awakePeriodSec) {
-    logInfo(APP_LOG, "I'll wake up in %d second(s).\n", appConfig.awakePeriodSec);
-    esp_sleep_enable_timer_wakeup(appConfig.awakePeriodSec * 1000000); // us to sec factor
+  // Wake up after a configurable duration
+  if (appConfig.deepSleepDurationSec) {
+    logInfo(APP_LOG, "I'll wake up in %d second(s).\n", appConfig.deepSleepDurationSec);
+    esp_sleep_enable_timer_wakeup(appConfig.deepSleepDurationSec * 1000000); // us to sec factor
   }
 
   // Go to sleep

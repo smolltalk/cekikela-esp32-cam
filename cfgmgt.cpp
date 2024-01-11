@@ -1,26 +1,27 @@
 #include "cfgmgt.h"
 
 /**
- * Initializes the appConfig_t structure given in parameter.
+ * Initialize the app_config_t structure given in parameter.
  * The initialization is run only once.
  * It starts by setting default values, then custom ones
  * and finally read the configuration file when enabled.
  * If an error occurs during the configuration file reading
  * while appConfig.ignoreConfigFromSdCardReadError is false,
- * then an error statusCode is returned and the application stops there.
- * In other cases, it always returns the ok statusCode.
+ * then an error is returned and the application stops there.
+ * In other cases, it always returns IS_OK.
  *
  * @param appConfig
+ *
  * @return the initialization result, especially about the config file reading
- * 
+ *
  * @see initAppConfigWithDefaultValues()
  * @see initAppConfigWithCustomValues()
  */
-statusCode initAppConfig(appConfig_t *appConfig) {
+status_code_t initAppConfig(app_config_t *appConfig) {
   // Setup app config once
   if (appConfig->setupConfigDone) {
     logAppConfig(appConfig);
-    return ok;
+    return IS_OK;
   }
 
   // Else
@@ -29,9 +30,9 @@ statusCode initAppConfig(appConfig_t *appConfig) {
   appConfig->setupConfigDone = true;
 
   // Try to read appConfig from SD card
-  statusCode result = readConfigFromSdCard(appConfig);
+  status_code_t result = readConfigFromSdCard(appConfig);
   logAppConfig(appConfig);
-  return appConfig->ignoreConfigFromSdCardReadError ? ok : result;
+  return appConfig->ignoreConfigFromSdCardReadError ? IS_OK : result;
 }
 
 /**
@@ -43,7 +44,7 @@ statusCode initAppConfig(appConfig_t *appConfig) {
  * @see initAppConfig()
  * @see initAppConfigWithCustomValues()
  */
-void initAppConfigWithDefaultValues(appConfig_t *appConfig) {
+void initAppConfigWithDefaultValues(app_config_t *appConfig) {
   // Read the configuration from the SD card and override this
   appConfig->readConfigFromSdCard = true;
   // Save the picture on the SD card
@@ -52,22 +53,31 @@ void initAppConfigWithDefaultValues(appConfig_t *appConfig) {
   appConfig->ignoreConfigFromSdCardReadError = true;
   // Awake Duration
   appConfig->awakeDurationMs = AWAKE_DURATION_MS_DEFAULT;
-  // Awake Period
-  appConfig->awakePeriodSec = AWAKE_PERIOD_SEC_DEFAULT;
-  // NTP
-  appConfig->syncTimePeriodHours = SYNC_TIME_PERIOD_HOURS_DEFAULT;
+  // Deep sleep duration
+  appConfig->deepSleepDurationSec = DEEP_SLEEP_DURATION_SEC_DEFAULT;
+  // WiFi
+  appConfig->wifi.connectAttemptMax = WIFI_CONNECT_ATTEMPT_MAX;
+  // Time (NTP)
+  appConfig->time.enabled = true;
+  strcpy(appConfig->time.ntpServer, TIME_NTP_SERVER_DEFAULT);
+  appConfig->time.gmtOffsetSec = TIME_GMT_OFFSET_SEC_DEFAULT;
+  appConfig->time.daylightOffsetSec = TIME_DAYLIGHT_OFFSET_SEC_DEFAULT;
+  appConfig->time.syncTimePeriodHours = TIME_SYNC_PERIOD_HOURS_DEFAULT;
   // WiFi
   appConfig->wifi.enabled = false;
   // OTA
-  appConfig->ota.checkPeriodHours = CHECK_PERIOD_HOURS_DEFAULT;
+  appConfig->ota.checkPeriodHours = OTA_CHECK_PERIOD_HOURS_DEFAULT;
   appConfig->ota.url[0] = '\0';
   // Upload
   appConfig->upload.enabled = false;
+  appConfig->upload.serverPort = UPLOAD_SERVER_PORT_DEFAULT;
+  appConfig->upload.bunchSize = UPLOAD_BUNCH_SIZE_DEFAULT;
+  appConfig->upload.fileNameRandSize = UPLOAD_FILE_NAME_RANDOM_SIZE;
   // Camera sensor settings
   appConfig->camera.getReadyDelayMs = GET_READY_DELAY_MS_DEFAULT;
 
   // Adjustments from https://forum.arduino.cc/t/about-esp32cam-image-too-dark-how-to-fix/1015490/5
-  sensorSettings_t settingsWithInitializedSetterOffset;
+  sensor_settings_t settingsWithInitializedSetterOffset;
   appConfig->camera.sensor = settingsWithInitializedSetterOffset;
   setSensorSetting(&(appConfig->camera.sensor.gain_ctrl), 1);      // Auto gain on
   setSensorSetting(&(appConfig->camera.sensor.exposure_ctrl), 1);  // Auto exposure on
@@ -77,12 +87,12 @@ void initAppConfigWithDefaultValues(appConfig_t *appConfig) {
 }
 
 /**
- * Logs all attributes of the application configuration.
+ * Log all the attributes of the application configuration.
  * It uses the INFO log level.
  *
  * @param appConfig
  */
-void logAppConfig(appConfig_t *appConfig) {
+void logAppConfig(app_config_t *appConfig) {
   logInfo(CFG_LOG, "Current App Config:");
   logInfo(CFG_LOG, "[root]");
   logInfo(CFG_LOG, "- setupConfigDone                 = %s", bool_str(appConfig->setupConfigDone));
@@ -91,19 +101,24 @@ void logAppConfig(appConfig_t *appConfig) {
   logInfo(CFG_LOG, "- ignoreConfigFromSdCardReadError = %s", bool_str(appConfig->ignoreConfigFromSdCardReadError));
   logInfo(CFG_LOG, "- savePictureOnSdCard             = %s", bool_str(appConfig->savePictureOnSdCard));
   logInfo(CFG_LOG, "- awakeDurationMs                 = %d", appConfig->awakeDurationMs);
-  logInfo(CFG_LOG, "- awakePeriodSec                  = %d", appConfig->awakePeriodSec);
-  logInfo(CFG_LOG, "- syncTimePeriodHours             = %d", appConfig->syncTimePeriodHours);
+  logInfo(CFG_LOG, "- deepSleepDurationSec            = %d", appConfig->deepSleepDurationSec);
   logInfo(CFG_LOG, "[wifi]");
   logInfo(CFG_LOG, "- enabled                         = %s", bool_str(appConfig->wifi.enabled));
   logInfo(CFG_LOG, "- ssid                            = %s", appConfig->wifi.ssid);
   logInfo(CFG_LOG, "- password                        = %s", appConfig->wifi.password);
   logInfo(CFG_LOG, "- connectAttemptMax               = %d", appConfig->wifi.connectAttemptMax);
+  logInfo(CFG_LOG, "[time]");
+  logInfo(CFG_LOG, "- enabled                         = %s", bool_str(appConfig->time.enabled));
+  logInfo(CFG_LOG, "- ntpServer                       = %s", appConfig->time.ntpServer);
+  logInfo(CFG_LOG, "- gmtOffsetSec                    = %d", appConfig->time.gmtOffsetSec);
+  logInfo(CFG_LOG, "- daylightOffsetSec               = %d", appConfig->time.daylightOffsetSec);
+  logInfo(CFG_LOG, "- syncTimePeriodHours             = %d", appConfig->time.syncTimePeriodHours);
   logInfo(CFG_LOG, "[ota]");
   logInfo(CFG_LOG, "- checkPeriodHours                = %d", appConfig->ota.checkPeriodHours);
   logInfo(CFG_LOG, "- url                             = %s", appConfig->ota.url);
   logInfo(CFG_LOG, "[upload]");
   logInfo(CFG_LOG, "- enabled                         = %s", bool_str(appConfig->upload.enabled));
-  logInfo(CFG_LOG, "- serverName                      = %s", appConfig->upload.serverName);
+  logInfo(CFG_LOG, "- serverAddress                      = %s", appConfig->upload.serverAddress);
   logInfo(CFG_LOG, "- serverPort                      = %d", appConfig->upload.serverPort);
   logInfo(CFG_LOG, "- path                            = %s", appConfig->upload.path);
   logInfo(CFG_LOG, "- auth                            = %s", appConfig->upload.auth);
@@ -115,27 +130,27 @@ void logAppConfig(appConfig_t *appConfig) {
 }
 
 /**
- * Reads the configuration file on SD card and fills the
+ * Read the configuration file on SD card and fills the
  * application configuration structure.
  * Read parameters values will override those set by 
  * initAppConfigWithDefaultValues() and by initAppConfigWithCustomValues().
  * If an error occurs during the configuration file reading
  * while appConfig.ignoreConfigFromSdCardReadError is false,
- * then an error statusCode is returned and the application stops there.
- * In other cases, it always returns the ok statusCode.
+ * then an error is returned and the application stops there.
+ * In other cases, it always returns the IS_OK.
  * When appConfig.ignoreConfigFromSdCardReadError is true,
  * the process will skip all wrong written / unknown parameters.
  * 
  * @param appConfig
- * @return ok on successful reading
- *         or readConfigError on read error
- *         or sdInitError when the SD card could not be mounted
- * 
+ * @return IS_OK on successful reading
+ *         or READ_CONFIG_ERROR on read error
+ *         or SD_INIT_ERROR when the SD card could not be mounted
+ *
  * @see initAppConfigWithDefaultValues()
  * @see initAppConfigWithCustomValues
  */
-statusCode readConfigFromSdCard(appConfig_t *appConfig) {
-  statusCode statusCode = ok;
+status_code_t readConfigFromSdCard(app_config_t *appConfig) {
+  status_code_t statusCode = IS_OK;
 
   // No requirement to read appConfig on SD Card
   // or appConfig has been already read
@@ -154,79 +169,87 @@ statusCode readConfigFromSdCard(appConfig_t *appConfig) {
 
   // Init SD card
   statusCode = initSdCard();
-  if (statusCode != ok) {
+  if (statusCode != IS_OK) {
     logError(CFG_LOG, "Failed to read config on SD card!");
     return statusCode;
   }
 
   // Prepare all known parameters that can be read.
   paramSetter_t rootParams[] = {
-    { false, "savePictureOnSdCard", &(appConfig->savePictureOnSdCard), setBool },
-    { false, "awakeDurationMs", &(appConfig->awakeDurationMs), setUint16 },
-    { false, "awakePeriodSec", &(appConfig->awakePeriodSec), setUint16 },
-    { false, "syncTimePeriodHours", &(appConfig->syncTimePeriodHours), setUint8 },
+    { false, "savePictureOnSdCard", &(appConfig->savePictureOnSdCard), setBool, 0 },
+    { false, "awakeDurationMs", &(appConfig->awakeDurationMs), setUint16, 0 },
+    { false, "deepSleepDurationSec", &(appConfig->deepSleepDurationSec), setUint16, 0 },
   };
 
   paramSetter_t wifiParams[] = {
-    { false, "enabled", &(appConfig->wifi.enabled), setBool },
-    { false, "ssid", appConfig->wifi.ssid, copyCString },
-    { false, "password", appConfig->wifi.password, copyEncryptedCString },
-    { false, "connectAttemptMax", &(appConfig->wifi.connectAttemptMax), setUint8 }
+    { false, "enabled", &(appConfig->wifi.enabled), setBool, 0 },
+    { false, "ssid", appConfig->wifi.ssid, copyCString, WIFI_SSID_MAX_SIZE },
+    { false, "password", appConfig->wifi.password, copyEncryptedCString, WIFI_PASSWORD_MAX_SIZE },
+    { false, "connectAttemptMax", &(appConfig->wifi.connectAttemptMax), setUint8, 0 }
+  };
+
+  paramSetter_t timeParams[] = {
+    { false, "enabled", &(appConfig->time.enabled), setBool, 0 },
+    { false, "ntpServer", appConfig->time.ntpServer, copyCString, TIME_NTP_SERVER_MAX_SIZE },
+    { false, "gmtOffsetSec", &(appConfig->time.gmtOffsetSec), setLong, 0 },
+    { false, "daylightOffsetSec", &(appConfig->time.daylightOffsetSec), setInt, 0 },
+    { false, "syncTimePeriodHours", &(appConfig->time.syncTimePeriodHours), setUint8, 0 }
   };
 
   paramSetter_t otaParams[] = {
-    { false, "checkPeriodHours", &(appConfig->ota.checkPeriodHours), setUint8 },
-    { false, "url", &(appConfig->ota.url), copyCString },
+    { false, "checkPeriodHours", &(appConfig->ota.checkPeriodHours), setUint8, 0 },
+    { false, "url", &(appConfig->ota.url), copyCString, OTA_FIRWARE_UPDATE_URL_SIZE },
   };
 
   paramSetter_t uploadParams[] = {
-    { false, "enabled", &(appConfig->upload.enabled), setBool },
-    { false, "serverName", appConfig->upload.serverName, copyCString },
-    { false, "serverPort", &(appConfig->upload.serverPort), setInt },
-    { false, "path", appConfig->upload.path, copyCString },
-    { false, "auth", appConfig->upload.auth, copyEncryptedCString },
-    { false, "bunchSize", &(appConfig->upload.bunchSize), setUint8 },
-    { false, "fileNameRandSize", &(appConfig->upload.fileNameRandSize), setUint8 }
+    { false, "enabled", &(appConfig->upload.enabled), setBool, 0 },
+    { false, "serverAddress", appConfig->upload.serverAddress, copyCString, UPLOAD_SERVER_ADDRESS_MAX_SIZE },
+    { false, "serverPort", &(appConfig->upload.serverPort), setInt, 0 },
+    { false, "path", appConfig->upload.path, copyCString, UPLOAD_PATH_MAX_SIZE },
+    { false, "auth", appConfig->upload.auth, copyEncryptedCString, UPLOAD_AUTH_MAX_SIZE },
+    { false, "bunchSize", &(appConfig->upload.bunchSize), setUint8, 0 },
+    { false, "fileNameRandSize", &(appConfig->upload.fileNameRandSize), setUint8, 0 }
   };
 
   paramSetter_t cameraParams[] = {
-    { false, "getReadyDelayMs", &(appConfig->camera.getReadyDelayMs), setUint16 }
+    { false, "getReadyDelayMs", &(appConfig->camera.getReadyDelayMs), setUint16, 0 }
   };
 
   paramSetter_t sensorParams[] = {
-    { false, "contrast", &(appConfig->camera.sensor.contrast), setCameraSensorSetting },
-    { false, "brightness", &(appConfig->camera.sensor.brightness), setCameraSensorSetting },
-    { false, "saturation", &(appConfig->camera.sensor.saturation), setCameraSensorSetting },
-    { false, "sharpness", &(appConfig->camera.sensor.sharpness), setCameraSensorSetting },
-    { false, "gainceiling", &(appConfig->camera.sensor.gainceiling), setCameraSensorSetting },
-    { false, "framesize", &(appConfig->camera.sensor.framesize), setCameraSensorSetting },
-    { false, "pixformat", &(appConfig->camera.sensor.pixformat), setCameraSensorSetting },
-    { false, "denoise", &(appConfig->camera.sensor.denoise), setCameraSensorSetting },
-    { false, "quality", &(appConfig->camera.sensor.quality), setCameraSensorSetting },
-    { false, "colorbar", &(appConfig->camera.sensor.colorbar), setCameraSensorSetting },
-    { false, "whitebal", &(appConfig->camera.sensor.whitebal), setCameraSensorSetting },
-    { false, "gain_ctrl", &(appConfig->camera.sensor.gain_ctrl), setCameraSensorSetting },
-    { false, "exposure_ctrl", &(appConfig->camera.sensor.exposure_ctrl), setCameraSensorSetting },
-    { false, "hmirror", &(appConfig->camera.sensor.hmirror), setCameraSensorSetting },
-    { false, "vflip", &(appConfig->camera.sensor.vflip), setCameraSensorSetting },
-    { false, "aec2", &(appConfig->camera.sensor.aec2), setCameraSensorSetting },
-    { false, "awb_gain", &(appConfig->camera.sensor.awb_gain), setCameraSensorSetting },
-    { false, "agc_gain", &(appConfig->camera.sensor.agc_gain), setCameraSensorSetting },
-    { false, "aec_value", &(appConfig->camera.sensor.aec_value), setCameraSensorSetting },
-    { false, "special_effect", &(appConfig->camera.sensor.special_effect), setCameraSensorSetting },
-    { false, "wb_mode", &(appConfig->camera.sensor.wb_mode), setCameraSensorSetting },
-    { false, "ae_level", &(appConfig->camera.sensor.ae_level), setCameraSensorSetting },
-    { false, "dcw", &(appConfig->camera.sensor.dcw), setCameraSensorSetting },
-    { false, "bpc", &(appConfig->camera.sensor.bpc), setCameraSensorSetting },
-    { false, "wpc", &(appConfig->camera.sensor.wpc), setCameraSensorSetting },
-    { false, "raw_gma", &(appConfig->camera.sensor.raw_gma), setCameraSensorSetting },
-    { false, "lenc", &(appConfig->camera.sensor.lenc), setCameraSensorSetting }
+    { false, "contrast", &(appConfig->camera.sensor.contrast), setCameraSensorSetting, 0 },
+    { false, "brightness", &(appConfig->camera.sensor.brightness), setCameraSensorSetting, 0 },
+    { false, "saturation", &(appConfig->camera.sensor.saturation), setCameraSensorSetting, 0 },
+    { false, "sharpness", &(appConfig->camera.sensor.sharpness), setCameraSensorSetting, 0 },
+    { false, "gainceiling", &(appConfig->camera.sensor.gainceiling), setCameraSensorSetting, 0 },
+    { false, "framesize", &(appConfig->camera.sensor.framesize), setCameraSensorSetting, 0 },
+    { false, "pixformat", &(appConfig->camera.sensor.pixformat), setCameraSensorSetting, 0 },
+    { false, "denoise", &(appConfig->camera.sensor.denoise), setCameraSensorSetting, 0 },
+    { false, "quality", &(appConfig->camera.sensor.quality), setCameraSensorSetting, 0 },
+    { false, "colorbar", &(appConfig->camera.sensor.colorbar), setCameraSensorSetting, 0 },
+    { false, "whitebal", &(appConfig->camera.sensor.whitebal), setCameraSensorSetting, 0 },
+    { false, "gain_ctrl", &(appConfig->camera.sensor.gain_ctrl), setCameraSensorSetting, 0 },
+    { false, "exposure_ctrl", &(appConfig->camera.sensor.exposure_ctrl), setCameraSensorSetting, 0 },
+    { false, "hmirror", &(appConfig->camera.sensor.hmirror), setCameraSensorSetting, 0 },
+    { false, "vflip", &(appConfig->camera.sensor.vflip), setCameraSensorSetting, 0 },
+    { false, "aec2", &(appConfig->camera.sensor.aec2), setCameraSensorSetting, 0 },
+    { false, "awb_gain", &(appConfig->camera.sensor.awb_gain), setCameraSensorSetting, 0 },
+    { false, "agc_gain", &(appConfig->camera.sensor.agc_gain), setCameraSensorSetting, 0 },
+    { false, "aec_value", &(appConfig->camera.sensor.aec_value), setCameraSensorSetting, 0 },
+    { false, "special_effect", &(appConfig->camera.sensor.special_effect), setCameraSensorSetting, 0 },
+    { false, "wb_mode", &(appConfig->camera.sensor.wb_mode), setCameraSensorSetting, 0 },
+    { false, "ae_level", &(appConfig->camera.sensor.ae_level), setCameraSensorSetting, 0 },
+    { false, "dcw", &(appConfig->camera.sensor.dcw), setCameraSensorSetting, 0 },
+    { false, "bpc", &(appConfig->camera.sensor.bpc), setCameraSensorSetting, 0 },
+    { false, "wpc", &(appConfig->camera.sensor.wpc), setCameraSensorSetting, 0 },
+    { false, "raw_gma", &(appConfig->camera.sensor.raw_gma), setCameraSensorSetting, 0 },
+    { false, "lenc", &(appConfig->camera.sensor.lenc), setCameraSensorSetting, 0 }
   };
 
   // Associate all prepared parameters array with their dedicated section
-  sectionParamSetter_t sectionParams[] = {
+  section_param_setter_t sectionParams[] = {
     { "", rootParams, sizeof(rootParams) / sizeof(paramSetter_t) },
     { "wifi", wifiParams, sizeof(wifiParams) / sizeof(paramSetter_t) },
+    { "time", timeParams, sizeof(timeParams) / sizeof(paramSetter_t) },
     { "ota", otaParams, sizeof(otaParams) / sizeof(paramSetter_t) },
     { "upload", uploadParams, sizeof(uploadParams) / sizeof(paramSetter_t) },
     { "camera", cameraParams, sizeof(cameraParams) / sizeof(paramSetter_t) },
@@ -234,15 +257,15 @@ statusCode readConfigFromSdCard(appConfig_t *appConfig) {
   };
 
   fs::FS &fs = SD_MMC;
-  logInfo(CFG_LOG, "File %s %s.", CONFIG_FILE_NAME, fs.exists(CONFIG_FILE_NAME) ? "exists" : "does not exist");
+  logInfo(CFG_LOG, "File %s %s.", CFG_CONFIG_FILE_NAME, fs.exists(CFG_CONFIG_FILE_NAME) ? "exists" : "does not exist");
 
   FileConfig fileConfig;
 
   // Initialize FileConfig object
-  if (fileConfig.begin(fs, CONFIG_FILE_NAME, CONFIG_VALUE_MAX_SIZE, CONFIG_VALUE_MAX_SIZE, true, appConfig->ignoreConfigFromSdCardReadError)) {
+  if (fileConfig.begin(fs, CFG_CONFIG_FILE_NAME, CFG_CONFIG_VALUE_MAX_SIZE, CFG_CONFIG_VALUE_MAX_SIZE, true, appConfig->ignoreConfigFromSdCardReadError)) {
     paramSetter_t *params = sectionParams[0].params;
     size_t paramCount = sectionParams[0].paramCount;
-    size_t sectionParamCount = sizeof(sectionParams) / sizeof(sectionParamSetter_t);
+    size_t sectionParamCount = sizeof(sectionParams) / sizeof(section_param_setter_t);
 
     logDebug(CFG_LOG, "Max param count=%d.", paramCount);
 
@@ -275,7 +298,7 @@ statusCode readConfigFromSdCard(appConfig_t *appConfig) {
         if (!param->alreadySet && fileConfig.nameIs(param->paramName)) {
           param->alreadySet = true;
           logDebug(CFG_LOG, "Config call setter for param %s with value %s.", param->paramName, fileConfig.getValue());
-          param->setter(&fileConfig, param->paramValueAddress);
+          param->setter(&fileConfig, param);
           wrongParameter = false;
           break;
         }
@@ -287,114 +310,143 @@ statusCode readConfigFromSdCard(appConfig_t *appConfig) {
     fileConfig.end();
     logInfo(CFG_LOG, "Config successfully read on SD card.");
   } else {
-    logError(CFG_LOG, "Failed to read config file %s!", CONFIG_FILE_NAME);
-    statusCode = readConfigError;
+    logError(CFG_LOG, "Failed to read config file %s!", CFG_CONFIG_FILE_NAME);
+    statusCode = READ_CONFIG_ERROR;
   }
 
   return statusCode;
 }
 
 /**
- * Set the memory location referenced by paramValueAddress
- * with the current FileConfig parameter value casted as bool.
+ * @brief Set the memory location referenced by paramValueAddress
+ *        with the current FileConfig parameter value casted as bool.
  *
- * @param fileConfig a reference to FileConfig handle the configuration file reading
- * @param paramValueAddress a reference to the (appConfig) parameter to set
- *
- * @see readConfigFromSdCard()
- */
-void setBool(FileConfig *fileConfig, void *paramValueAddress) {
-  *((bool *)paramValueAddress) = fileConfig->getBooleanValue();
-}
-
-/**
- * Set the memory location referenced by paramValueAddress
- * with the current FileConfig parameter value casted as int.
- *
- * @param fileConfig a reference to FileConfig handle the configuration file reading
- * @param paramValueAddress a reference to the (appConfig) parameter to set
+ * @param fileConfig  a reference to FileConfig handle the configuration file reading
+ * @param paramSetter a reference to parameter setter structure
+ *                    containing the (app_config_t) parameter address
  *
  * @see readConfigFromSdCard()
  */
-void setInt(FileConfig *fileConfig, void *paramValueAddress) {
-  *((int *)paramValueAddress) = fileConfig->getIntValue();
+void setBool(FileConfig *fileConfig, paramSetter_t *paramSetter) {
+  *((bool *)paramSetter->paramValueAddress) = fileConfig->getBooleanValue();
 }
 
 /**
- * Set the memory location referenced by paramValueAddress
- * with the current FileConfig parameter value casted as uint16_t.
+ * @brief Set the memory location referenced by paramValueAddress
+ *        with the current FileConfig parameter value casted as int.
  *
- * @param fileConfig a reference to FileConfig handle the configuration file reading
- * @param paramValueAddress a reference to the (appConfig) parameter to set
+ * @param fileConfig  a reference to FileConfig handle the configuration file reading
+ * @param paramSetter a reference to parameter setter structure
+ *                    containing the (app_config_t) parameter address
  *
  * @see readConfigFromSdCard()
  */
-void setUint16(FileConfig *fileConfig, void *paramValueAddress) {
-  *((uint16_t *)paramValueAddress) = (uint16_t)fileConfig->getIntValue();
+void setInt(FileConfig *fileConfig, paramSetter_t *paramSetter) {
+  *((int *)paramSetter->paramValueAddress) = fileConfig->getIntValue();
 }
 
 /**
- * Set the memory location referenced by paramValueAddress
- * with the current FileConfig parameter value casted as uint8_t.
+ * @brief Set the memory location referenced by paramValueAddress
+ *        with the current FileConfig parameter value casted as long.
  *
- * @param fileConfig a reference to FileConfig handle the configuration file reading
- * @param paramValueAddress a reference to the (appConfig) parameter to set
+ * @param fileConfig  a reference to FileConfig handle the configuration file reading
+ * @param paramSetter a reference to parameter setter structure
+ *                    containing the (app_config_t) parameter address
  *
  * @see readConfigFromSdCard()
  */
-void setUint8(FileConfig *fileConfig, void *paramValueAddress) {
-  *((uint8_t *)paramValueAddress) = (uint8_t)fileConfig->getIntValue();
+void setLong(FileConfig *fileConfig, paramSetter_t *paramSetter) {
+  const char *str = fileConfig->getValue(true);
+  if (str)
+  {
+    *((long *)paramSetter->paramValueAddress) = atol(str);
+  }
 }
 
 /**
- * Copy to the memory location referenced by paramValueAddress
- * the current FileConfig parameter value casted as a C string.
+ * @brief Set the memory location referenced by paramValueAddress
+ *        with the current FileConfig parameter value casted as uint16_t.
  *
- * @param fileConfig a reference to FileConfig handle the configuration file reading
- * @param paramValueAddress a reference to the (appConfig) parameter to set
+ * @param fileConfig  a reference to FileConfig handle the configuration file reading
+ * @param paramSetter a reference to parameter setter structure
+ *                    containing the (app_config_t) parameter address
  *
  * @see readConfigFromSdCard()
  */
-void copyCString(FileConfig *fileConfig, void *paramValueAddress) {
-  strcpy((char *)paramValueAddress, (const char *)fileConfig->getValue());
+void setUint16(FileConfig *fileConfig, paramSetter_t *paramSetter) {
+  *((uint16_t *)paramSetter->paramValueAddress) = (uint16_t)fileConfig->getIntValue();
 }
 
 /**
- * Copy to the memory location referenced by paramValueAddress
- * the current FileConfig parameter decrypted value casted as a C string.
+ * @brief Set the memory location referenced by paramValueAddress
+ *        with the current FileConfig parameter value casted as uint8_t.
+ *
+ * @param fileConfig  a reference to FileConfig handle the configuration file reading
+ * @param paramSetter a reference to parameter setter structure
+ *                    containing the (app_config_t) parameter address
+ *
+ * @see readConfigFromSdCard()
+ */
+void setUint8(FileConfig *fileConfig, paramSetter_t *paramSetter) {
+  *((uint8_t *)paramSetter->paramValueAddress) = (uint8_t)fileConfig->getIntValue();
+}
+
+/**
+ * @brief Copy to the memory location referenced by paramValueAddress
+ *        the current FileConfig parameter value casted as a C string.
+ *
+ * @param fileConfig  a reference to FileConfig handle the configuration file reading
+ * @param paramSetter a reference to parameter setter structure
+ *                    containing the (app_config_t) parameter address
+ *                    and the C string max size
+ *
+ * @see readConfigFromSdCard()
+ */
+void copyCString(FileConfig *fileConfig, paramSetter_t *paramSetter) {
+  strlcpy((char *)paramSetter->paramValueAddress, (const char *)fileConfig->getValue(), paramSetter->maxSize);
+}
+
+/**
+ * @brief Copy to the memory location referenced by paramValueAddress
+ *        the current FileConfig parameter decrypted value casted as a C string.
+ *
  * The parameter value is first decrypted by decryptToCString.
  * The (reverse byte array) mac address is used as the decrypting key.
- * Fill free to use an other key.
+ * Fill free to use another key.
  *
- * @param fileConfig a reference to FileConfig handle the configuration file reading
- * @param paramValueAddress a reference to the (appConfig) parameter to set
+ * @param fileConfig  a reference to FileConfig handle the configuration file reading
+ * @param paramSetter a reference to parameter setter structure
+ *                    containing the (app_config_t) parameter address
+ *                    and the C string max size
  *
  * @see decryptToCString()
  * @see readConfigFromSdCard()
  */
-void copyEncryptedCString(FileConfig *fileConfig, void *paramValueAddress) {
+void copyEncryptedCString(FileConfig *fileConfig, paramSetter_t *paramSetter) {
   byte key[6];
-  fillReverseMacAddress(key);
-  decryptToCString((char *)paramValueAddress, CONFIG_VALUE_MAX_SIZE, NULL, fileConfig->getValue(), (const char *) key, 6);
+  fillWithMacAddress(key);
+  decryptToCString((char *)paramSetter->paramValueAddress, paramSetter->maxSize, NULL, fileConfig->getValue(), (const char *)key, 6);
 }
 
 /**
- * Set the sensorSetting variable referenced by sensorSettingAddress
- * with the current FileConfig parameter value casted as int.
+ * @brief Set the sensorSetting variable referenced by sensorSettingAddress
+ *        with the current FileConfig parameter value casted as int.
  *
- * @param fileConfig a reference to FileConfig handle the configuration file reading
- * @param sensorSettingAddress a reference to the (sensorSetting_t) parameter to set
+ * @param fileConfig  a reference to FileConfig handle the configuration file reading
+ * @param paramSetter a reference to parameter setter structure
+ *                    containing the reference to the sensor parameter (sensor_param_setter_t) to set.
  *
  * @see readConfigFromSdCard()
  */
-void setCameraSensorSetting(FileConfig *fileConfig, void *sensorSettingAddress) {
-  sensorSetting_t *sensorSetting = (sensorSetting_t *)sensorSettingAddress;
+void setCameraSensorSetting(FileConfig *fileConfig, paramSetter_t *paramSetter) {
+  sensor_param_setter_t *sensorSetting = (sensor_param_setter_t *) paramSetter->paramValueAddress;
   sensorSetting->enabled = true;
   sensorSetting->value = fileConfig->getIntValue();
 }
 
-/*
- * Decrypt a base64 C string to a C string.
+/**
+ * @brief Decrypt a base64 C string to a C string.
+ *
  * The key is byte array.
  * The cypher algorithm is just a XOR between the base64 string
  * and the key array.
@@ -418,18 +470,18 @@ void setCameraSensorSetting(FileConfig *fileConfig, void *sensorSettingAddress) 
  * var encryptedTextB64 = btoa(String.fromCharCode(...encryptedTextArray));
  * console.log(encryptedTextB64);
  *
- * @param dest the destination buffer receiving the decrypted C string
- * @param dlen the max size of the destination buffer
- * @param olen the effective length of the decrypted C string
+ * @param dest   the destination buffer receiving the decrypted C string
+ * @param dlen   the max size of the destination buffer
+ * @param olen   the effective length of the decrypted C string
  * @param b64Src the base64 source C string to decrypt
- * @param key the byte array key used to decrypt b64Src
+ * @param key    the byte array key used to decrypt b64Src
  * @param keyLen the key size
  *
  * @see copyEncryptedCString()
  */
 void decryptToCString(char *dest, const size_t dlen, size_t *olen, const char *b64Src, const char *key, const size_t keyLen) {
   size_t _olen;
-  mbedtls_base64_decode((unsigned char *) dest, dlen, &_olen, (const unsigned char *)b64Src, strlen(b64Src));
+  mbedtls_base64_decode((unsigned char *)dest, dlen, &_olen, (const unsigned char *)b64Src, strlen(b64Src));
   for (int i = 0; i < _olen; i++) {
     dest[i] = dest[i] ^ key[i % keyLen];
   }
