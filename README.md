@@ -156,7 +156,8 @@ void initAppConfigWithCustomValues(app_config_t * appConfig) {
 |app_config_t.deepSleepDurationSec||It defines the sleep duration in seconds before the board will be waken up.<br/>A 0 value disables the feature.|uint16_t|[0, 65535]|0|`appConfig->deepSleepDurationSec=600;`|deepSleepDurationSec=600|
 |wifi_settings_t.enabled|WiFi|It enables WiFi connections.<br/>WiFi is required to update time by NTP and to upload pictures.|bool|true, false|false|`appConfig->wifi.enabled = true;`|wifi.enabled=true|
 |wifi_settings_t.ssid|WiFi|WiFi SSID, i.e. the name of your WiFi network|char *|31 characters max||`strcpy(appConfig->wifi.ssid, "MyWiFiSSID");`|wifi.ssid=MyWiFiSSID|
-|wifi_settings_t.password|WiFi|WiFi network password|char *|31 characters max||`strcpy(appConfig->wifi.password, "MyWiFiPassword");`|wifi.password=MyWiFiPassword|
+|wifi_settings_t.password|WiFi|WiFi network password in clear text|char *|31 characters max||`strcpy(appConfig->wifi.password, "MyWiFiPassword");`|wifi.password=MyWiFiPassword|
+|wifi_settings_t.passwordEnc|WiFi|WiFi network password encrypted, to keep it secret. See the section [Encrypted strings](#encrypted-strings).|char *|31 characters max|||wifi.passwordEnc=See the section [Encrypted strings](#encrypted-strings)|
 |wifi_settings_t.connectAttemptMax|WiFi|The max count of attempts to be connected|uint8_t|[0, 255]|30|`appConfig->wifi.connectAttemptMax = 30;`|wifi.connectAttemptMax=30|
 |time_settings_t.enabled|Time|When enabled, the time is synchronized by NTP|bool|true, false|true|`appConfig->time.enabled = true;`|time.enabled=true|
 |time_settings_t.ntpServer|Time|NTP server address|char *|63 characters max|pool.ntp.org|`strcpy(appConfig->time.ntpServer, "myntpserver.mydomain.com");`|time.ntpServer=myntpserver.mydomain.com|
@@ -167,7 +168,8 @@ void initAppConfigWithCustomValues(app_config_t * appConfig) {
 |upload_settings_t.serverAddress|Upload|Address of the server receiving pictures.|char *|63 characters max||`strcpy(appConfig->upload.path, "myserver.picture.com");`|upload.serverAddress=myserver.picture.com|
 |upload_settings_t.serverPort|Upload|Listening TCP port of the server receiving pictures.|uint16_t|[1, 65535]|80|`appConfig->upload.serverPort=8080;`|upload.serverPort=8080|
 |upload_settings_t.path|Upload|Upload path of the service receiving data.|char *|63 characters max||`strcpy(appConfig->upload.path, "/upload.php");`|upload.path=/upload.php|
-|upload_settings_t.auth|Upload|Address of the server receiving pictures.|char *|31 characters max||`strcpy(appConfig->upload.auth, "MyUploadPassword");`|upload.auth=MyUploadPassword|
+|upload_settings_t.auth|Upload|Authentication key in clear text|char *|31 characters max||`strcpy(appConfig->upload.auth, "MyUploadPassword");`|upload.auth=MyUploadPassword|
+|upload_settings_t.authEnc|Upload|Authentication key encrypted, to keep it secret. See the section [Encrypted strings](#encrypted-strings).|char *|31 characters max|||upload.authEnc=see the section [Encrypted strings](#encrypted-strings)|
 |upload_settings_t.bunchSize|Upload|Upload in packs of `bunchSize` when pictures are stored on SD card.|uint8_t|[0, 255]|10|`appConfig->upload.bunchSize=10;`|upload.bunchSize=10|
 |upload_settings_t.fileNameRandSize|Upload|When the picture is not stored on the SD card,<br/>a random file name is computed.<br/>Its format is `pic-random.jpg` where `random` is randomly composed of numbers and letters.<br/>`fileNameRandSize` defines the length of the random part.|uint8_t|[1, 8]|5|`appConfig->upload.fileNameRandSize=5;`|upload.fileNameRandSize=5|
 |camera_settings_t.getReadyDelayMs|Camera|Time required to let the sensor be ready. A delay of 1500ms prevents 'green' pictures.|uint16_t|[0, 65535]|1500|`appConfig->camera.getReadyDelayMs=1500`|camera.getReadyDelayMs=1500|
@@ -200,6 +202,29 @@ void initAppConfigWithCustomValues(app_config_t * appConfig) {
 |sensor_settings_t.quality|Camera Sensor||int||16|`setSensorSetting(&(appConfig->camera.sensor.quality), 0)`|sensor.quality=0|
 
 Further details are available in `sensor.h` and [here](https://randomnerdtutorials.com/esp32-cam-ov2640-camera-settings/).
+
+### Encrypted strings
+ 
+To crypt a string (like wifi.passwordEnc or upload.authEnc), I suggest the following JavaScript code.  
+Just modify:  
+- the text with yours
+- the key array with your one. If you want to use the mac address bytes,
+  you can copy them from the application logs at the startup.
+
+```javascript  
+var text = 'My program seems to work fine!';
+
+console.log(text)
+var textArray = new TextEncoder().encode(text);
+var keyArray = new Uint8Array([124, 245, 156, 96, 98, 236]);
+
+console.log(textArray.toLocaleString());
+var encryptedTextArray = textArray.map((e, i) => e ^ keyArray[i % keyArray.length]);
+console.log(encryptedTextArray.toLocaleString());
+
+var encryptedTextB64 = btoa(String.fromCharCode(...encryptedTextArray));
+console.log(encryptedTextB64);
+```
 
 ## Status codes
 

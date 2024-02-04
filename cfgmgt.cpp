@@ -184,7 +184,8 @@ status_code_t readConfigFromSdCard(app_config_t *appConfig) {
   paramSetter_t wifiParams[] = {
     { false, "enabled", &(appConfig->wifi.enabled), setBool, 0 },
     { false, "ssid", appConfig->wifi.ssid, copyCString, WIFI_SSID_MAX_SIZE },
-    { false, "password", appConfig->wifi.password, copyEncryptedCString, WIFI_PASSWORD_MAX_SIZE },
+    { false, "password", appConfig->wifi.password, copyCString, WIFI_PASSWORD_MAX_SIZE },
+    { false, "passwordEnc", appConfig->wifi.password, copyEncryptedCString, WIFI_PASSWORD_MAX_SIZE },
     { false, "connectAttemptMax", &(appConfig->wifi.connectAttemptMax), setUint8, 0 }
   };
 
@@ -206,7 +207,8 @@ status_code_t readConfigFromSdCard(app_config_t *appConfig) {
     { false, "serverAddress", appConfig->upload.serverAddress, copyCString, UPLOAD_SERVER_ADDRESS_MAX_SIZE },
     { false, "serverPort", &(appConfig->upload.serverPort), setInt, 0 },
     { false, "path", appConfig->upload.path, copyCString, UPLOAD_PATH_MAX_SIZE },
-    { false, "auth", appConfig->upload.auth, copyEncryptedCString, UPLOAD_AUTH_MAX_SIZE },
+    { false, "auth", appConfig->upload.auth, copyCString, UPLOAD_AUTH_MAX_SIZE },
+    { false, "authEnc", appConfig->upload.auth, copyEncryptedCString, UPLOAD_AUTH_MAX_SIZE },
     { false, "bunchSize", &(appConfig->upload.bunchSize), setUint8, 0 },
     { false, "fileNameRandSize", &(appConfig->upload.fileNameRandSize), setUint8, 0 }
   };
@@ -447,13 +449,13 @@ void setCameraSensorSetting(FileConfig *fileConfig, paramSetter_t *paramSetter) 
 /**
  * @brief Decrypt a base64 C string to a C string.
  *
- * The key is byte array.
+ * The key is a byte array.
  * The cypher algorithm is just a XOR between the base64 string
  * and the key array.
  * 
  * To crypt a string, I suggest the following JavaScript code.
  * Just modify:
- * - the text with your one
+ * - the text with yours
  * - the key array with your one. If you want to use the mac address bytes,
  *   you can copy them from the application logs at the startup.
  *
